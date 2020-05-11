@@ -1,8 +1,8 @@
 name: 'Pull request reviews reminder action'
 description: 'Automatically send notification for pull requests waiting for reviewers'
 branding:
-  icon: 'calendar'
-  color: 'green'
+  icon: 'bell'
+  color: 'red'
 inputs:
   slack-webook-url:
     description: 'Slack webhook URL'
