@@ -5,7 +5,7 @@ const axios = require('axios');
 const { getPullRequestsWithRequestedReviewers, createPr2UserArray, prettyMessage } = require("./functions");
 
 const GITHUB_API_URL = 'https://api.github.com';
-const { GITHUB_TOKEN, GITHUB_REPOSITORY, SLACK_WEBHOOK_URL, SLACK_CHANNEL } = process.env;
+const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
 const AUTH_HEADER = {
   Authorization: `token ${GITHUB_TOKEN}`
 };
@@ -19,12 +19,12 @@ function getPullRequests() {
   });
 }
 
-function sendNotification(message) {
+function sendNotification(slackWehookUrl, slackChannel, message) {
   return axios({
     method: 'POST',
-    url: SLACK_WEBHOOK_URL,
+    url: slackWehookUrl,
     data: {
-      channel: SLACK_CHANNEL,
+      channel: slackChannel,
       username: 'Pull Request reviews reminder',
       text: message,
     }
@@ -33,7 +33,8 @@ function sendNotification(message) {
 
 async function main() {
   try {
-    //const sprintDuration = core.getInput('sprint-duration'); // Default is 1
+    const slackWehookUrl = core.getInput('slack-webhook-url');
+    const slackChannel = core.getInput('slack-channel');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
@@ -41,7 +42,7 @@ async function main() {
     core.info(`There are ${pullRequestsWithRequestedReviewers.length} waiting for a review`);
     const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
     const message = prettyMessage(pr2user);
-    await sendNotification(message);
+    await sendNotification(slackWehookUrl, slackChannel, message);
     core.info(`Notification sent successfully!`);
   } catch (error) {
     core.setFailed(error.message);
