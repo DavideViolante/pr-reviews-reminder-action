@@ -7,7 +7,6 @@ inputs:
   slack-webook-url:
     description: 'Slack webhook URL'
     required: true
-    default: ''
   slack-channel:
     description: 'Slack channel name'
     required: false
