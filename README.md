@@ -9,7 +9,7 @@ Action to send Slack notifications when there are pull requests pending for revi
 
 ## Inputs
 
-### slack-webook-url
+### slack-webhook-url
 
 The Slack webhook URL (required). More info [here](https://api.slack.com/messaging/webhooks).
 
@@ -35,7 +35,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        slack-webook-url: '' # Required
+        slack-webhook-url: '' # Required
         slack-channel: '' # Eg: #general
 ```
 
