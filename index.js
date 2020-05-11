@@ -1,5 +1,8 @@
+
 const core = require('@actions/core');
 const axios = require('axios');
+
+const { getPullRequestsWithRequestedReviewers, createPr2UserArray, prettyMessage } = require("./functions");
 
 const GITHUB_API_URL = 'https://api.github.com';
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, SLACK_WEBHOOK_URL, SLACK_CHANNEL } = process.env;
@@ -14,18 +17,6 @@ function getPullRequests() {
     url: PULLS_ENDPOINT,
     headers: AUTH_HEADER
   });
-}
-
-function getPullRequestsWithRequestedReview(pullRequests) {
-  return pullRequests.filter(pr => pr.requested_reviewers.length);
-}
-
-function prettyMessage(pr2user) {
-  let message = '';
-  for (const obj of pr2user) {
-    message += `Hey *${obj.login}*, this PR is waiting for your review: ${obj.url}\n`;
-  }
-  return message;
 }
 
 function sendNotification(message) {
@@ -46,14 +37,9 @@ async function main() {
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
-    const pullRequestsWithRequestedReview = getPullRequestsWithRequestedReview(pullRequests.data);
-    core.info(`There are ${pullRequestsWithRequestedReview.length} waiting for a review`);
-    const pr2user = [];
-    for (const pr of pullRequestsWithRequestedReview) {
-      for (const user of pr.requested_reviewers) {
-        pr2user.push({ url: pr.html_url, login: user.login });
-      }
-    }
+    const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
+    core.info(`There are ${pullRequestsWithRequestedReviewers.length} waiting for a review`);
+    const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
     const message = prettyMessage(pr2user);
     await sendNotification(message);
     core.info(`Notification sent successfully!`);
