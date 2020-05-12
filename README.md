@@ -15,7 +15,7 @@ The Slack channel name (eg: `#general`).
 
 ### github-slack-map
 
-A string like this `"githubusername1:slackuserid1,githubusername2:slackuserid2,..."` to define the mapping between GitHub usernames and Slack user IDs. Example: `"davideviolante:UEABCDEFG,foobar:UAABCDEFG"`. [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+A string like this `"githubusername1:slackuserid1,githubusername2:slackuserid2,..."` to define the mapping between GitHub usernames and Slack user IDs. Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
 
 ## Example usage
 
@@ -37,7 +37,7 @@ jobs:
       with:
         slack-webhook-url: '' # Required
         slack-channel: '' # Eg: #general
-        github-slack-map: '' # Eg: "davideviolante:UEABCDEFG,foobar:UAABCDEFG"
+        github-slack-map: '' # Eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
 ```
 
 ## Bug or feedback?
