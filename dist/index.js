@@ -938,11 +938,13 @@ async function main() {
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
     const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
-    core.info(`There are ${pullRequestsWithRequestedReviewers.length} waiting for a review`);
-    const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
-    const message = prettyMessage(pr2user);
-    await sendNotification(slackWehookUrl, slackChannel, message);
-    core.info(`Notification sent successfully!`);
+    core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
+    if (pullRequestsWithRequestedReviewers.length) {
+      const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
+      const message = prettyMessage(pr2user);
+      await sendNotification(slackWehookUrl, slackChannel, message);
+      core.info(`Notification sent successfully!`);
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
