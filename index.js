@@ -2,7 +2,12 @@
 const core = require('@actions/core');
 const axios = require('axios');
 
-const { getPullRequestsWithRequestedReviewers, createPr2UserArray, prettyMessage } = require("./functions");
+const {
+  getPullRequestsWithRequestedReviewers,
+  createPr2UserArray,
+  prettyMessage,
+  stringToObject
+} = require("./functions");
 
 const GITHUB_API_URL = 'https://api.github.com';
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
@@ -35,6 +40,7 @@ async function main() {
   try {
     const slackWehookUrl = core.getInput('slack-webhook-url');
     const slackChannel = core.getInput('slack-channel');
+    const github2slackString = core.getInput('github-slack-map');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
@@ -42,7 +48,8 @@ async function main() {
     core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
     if (pullRequestsWithRequestedReviewers.length) {
       const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
-      const message = prettyMessage(pr2user);
+      const github2slack = stringToObject(github2slackString);
+      const message = prettyMessage(pr2user, github2slack);
       await sendNotification(slackWehookUrl, slackChannel, message);
       core.info(`Notification sent successfully!`);
     }

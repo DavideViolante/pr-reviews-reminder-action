@@ -12,10 +12,26 @@ function createPr2UserArray(pullRequestsWithRequestedReview) {
   return pr2user;
 }
 
-function prettyMessage(pr2user) {
+// Convert string like "davideviolante:ID123,foobar:ID456" to 
+// object like { davideviolante: "ID123", foobar: "ID456" }
+function stringToObject(str) {
+  const map = {};
+  if (!str) {
+    return map;
+  }
+  const users = (str || '').split(',');
+  users.forEach(user => {
+    const [github, slack] = user.split(':');
+    map[github] = slack
+  });
+  return map;
+}
+
+function prettyMessage(pr2user, github2slack) {
   let message = '';
   for (const obj of pr2user) {
-    message += `Hey *${obj.login}*, this PR is waiting for your review: ${obj.url}\n`;
+    const mention = github2slack[obj.login] ? `<@${github2slack[obj.login]}>` : `@${obj.login}`;
+    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
   }
   return message;
 }
@@ -23,5 +39,6 @@ function prettyMessage(pr2user) {
 module.exports = {
   getPullRequestsWithRequestedReviewers,
   createPr2UserArray,
+  stringToObject,
   prettyMessage
 };

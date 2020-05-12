@@ -11,6 +11,10 @@ inputs:
     description: 'Slack channel name'
     required: false
     default: '#general'
+  github-slack-map:
+    description: 'Map GitHub username to Slack user IDs. Eg: "DavideViolante:UABCDEFGH,foobar123:UIHJKLMNO"'
+    required: false
+    default: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
