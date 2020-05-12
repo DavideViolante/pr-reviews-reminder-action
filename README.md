@@ -31,7 +31,7 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v1.0.0
+    - uses: davideviolante/pr-reviews-reminder-action@v1.0.3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
