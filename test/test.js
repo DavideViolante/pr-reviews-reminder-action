@@ -80,85 +80,85 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   
   it('Should get pull requests with requested reviewers (some reviewers)', () => {
     const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequests);
-    assert.equal(pullRequests.length, 2);
+    assert.strictEqual(pullRequests.length, 2);
   });
 
   it('Should get pull requests with requested reviewers (no reviewers)', () => {
     const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequestsNoReviewers);
-    assert.equal(pullRequests.length, 0);
+    assert.strictEqual(pullRequests.length, 0);
   });
   
   it('Should get pull requests with requested reviewers (no PRs)', () => {
     const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequestsNoData);
-    assert.equal(pullRequests.length, 0);
+    assert.strictEqual(pullRequests.length, 0);
   });
 
   it('Should create the array with pr and users (some reviewers)', () => {
     const array = createPr2UserArray(mockPullRequests);
-    assert.equal(array.length, 3);
-    assert.equal(array[0].login, 'User1');
-    assert.equal(array[0].url, 'https://example.com/1');
-    assert.equal(array[1].login, 'User2');
-    assert.equal(array[1].url, 'https://example.com/1');
-    assert.equal(array[2].login, 'User3');
-    assert.equal(array[2].url, 'https://example.com/3');
+    assert.strictEqual(array.length, 3);
+    assert.strictEqual(array[0].login, 'User1');
+    assert.strictEqual(array[0].url, 'https://example.com/1');
+    assert.strictEqual(array[1].login, 'User2');
+    assert.strictEqual(array[1].url, 'https://example.com/1');
+    assert.strictEqual(array[2].login, 'User3');
+    assert.strictEqual(array[2].url, 'https://example.com/3');
   });
 
   it('Should create the array with pr and users (no reviewers)', () => {
     const array = createPr2UserArray(mockPullRequestsNoReviewers);
-    assert.equal(array.length, 0);
+    assert.strictEqual(array.length, 0);
   });
 
   it('Should create the array with pr and users (no PRs)', () => {
     const array = createPr2UserArray(mockPullRequestsNoData);
-    assert.equal(array.length, 0);
+    assert.strictEqual(array.length, 0);
   });
 
   it('Should create an object from a string', () => {
     const obj = stringToObject(mockStringToConvert);
-    assert.equal(typeof obj, 'object');
-    assert.equal(obj.name1, 'ID1');
-    assert.equal(obj.name2, 'ID2');
-    assert.equal(obj.name3, 'ID3');
+    assert.strictEqual(typeof obj, 'object');
+    assert.strictEqual(obj.name1, 'ID1');
+    assert.strictEqual(obj.name2, 'ID2');
+    assert.strictEqual(obj.name3, 'ID3');
   });
 
   it('Should create an object from a string (one user)', () => {
     const obj = stringToObject(mockStringToConvertOneUser);
-    assert.equal(typeof obj, 'object');
-    assert.equal(obj.name1, 'ID1');
+    assert.strictEqual(typeof obj, 'object');
+    assert.strictEqual(obj.name1, 'ID1');
   });
 
   it('Should create an object from a string (malformed)', () => {
     const obj = stringToObject(mockStringToConvertMalformed);
-    assert.equal(typeof obj, 'object');
+    assert.strictEqual(typeof obj, 'object');
   });
 
   it('Should create an object from a string (empty)', () => {
     const obj = stringToObject(mockStringToConvertNoData);
-    assert.equal(typeof obj, 'object');
+    assert.strictEqual(typeof obj, 'object');
   });
 
   it('Should print the pretty message, one reviewer per row (correct map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2Slack);
     const [firstRow, secondRow, thirdRow] = message.split('\n');
-    assert.equal(firstRow, 'Hey <@ID123>, this PR is waiting for your review: https://example.com/1');
-    assert.equal(secondRow, 'Hey <@ID456>, this PR is waiting for your review: https://example.com/1');
-    assert.equal(thirdRow, 'Hey <@ID789>, this PR is waiting for your review: https://example.com/3');
+    assert.strictEqual(firstRow, 'Hey <@ID123>, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(secondRow, 'Hey <@ID456>, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(thirdRow, 'Hey <@ID789>, this PR is waiting for your review: https://example.com/3');
   });
 
   it('Should print the pretty message, one reviewer per row (malformed map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2SlackMalformed);
     const [firstRow, secondRow] = message.split('\n');
-    assert.equal(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
-    assert.equal(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
   });
 
   it('Should print the pretty message, one reviewer per row (no map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2SlackNoData);
     const [firstRow, secondRow, thirdRow] = message.split('\n');
-    assert.equal(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
-    assert.equal(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
-    assert.equal(thirdRow, 'Hey @User3, this PR is waiting for your review: https://example.com/3');
+    assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
+    assert.strictEqual(thirdRow, 'Hey @User3, this PR is waiting for your review: https://example.com/3');
   });
 
 });
