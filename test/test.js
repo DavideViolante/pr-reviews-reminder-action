@@ -65,16 +65,16 @@ const mockStringToConvert = 'name1:ID1,name2:ID2,name3:ID3';
 const mockStringToConvertOneUser = 'name1:ID1';
 const mockStringToConvertMalformed = 'foo;bar';
 const mockStringToConvertNoData = '';
-const mockGithub2Slack = {
+const mockGithub2provider = {
   User1: 'ID123',
   User2: 'ID456',
   User3: 'ID789'
 };
-const mockGithub2SlackMalformed = {
+const mockGithub2providerMalformed = {
   User1: undefined,
   User2: undefined
 }
-const mockGithub2SlackNoData = {};
+const mockGithub2providerNoData = {};
 
 describe('Pull Request Reviews Reminder Action tests', () => {
   
@@ -139,7 +139,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   });
 
   it('Should print the pretty message, one reviewer per row (correct map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2Slack);
+    const message = prettyMessage(mockPr2User, mockGithub2provider);
     const [firstRow, secondRow, thirdRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey <@ID123>, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey <@ID456>, this PR is waiting for your review: https://example.com/1');
@@ -147,14 +147,14 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   });
 
   it('Should print the pretty message, one reviewer per row (malformed map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2SlackMalformed);
+    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed);
     const [firstRow, secondRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
   });
 
   it('Should print the pretty message, one reviewer per row (no map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2SlackNoData);
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData);
     const [firstRow, secondRow, thirdRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');

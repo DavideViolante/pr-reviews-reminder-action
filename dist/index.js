@@ -686,16 +686,16 @@ function stringToObject(str) {
   }
   const users = (str || '').split(',');
   users.forEach(user => {
-    const [github, slack] = user.split(':');
-    map[github] = slack
+    const [github, provider] = user.split(':');
+    map[github] = provider
   });
   return map;
 }
 
-function prettyMessage(pr2user, github2slack) {
+function prettyMessage(pr2user, github2provider) {
   let message = '';
   for (const obj of pr2user) {
-    const mention = github2slack[obj.login] ? `<@${github2slack[obj.login]}>` : `@${obj.login}`;
+    const mention = github2provider[obj.login] ? `<@${github2provider[obj.login]}>` : `@${obj.login}`;
     message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
   }
   return message;
@@ -940,12 +940,12 @@ function getPullRequests() {
   });
 }
 
-function sendNotification(slackWehookUrl, slackChannel, message) {
+function sendNotification(webhookUrl, channel, message) {
   return axios({
     method: 'POST',
-    url: slackWehookUrl,
+    url: webhookUrl,
     data: {
-      channel: slackChannel,
+      channel: channel,
       username: 'Pull Request reviews reminder',
       text: message,
     }
@@ -954,9 +954,9 @@ function sendNotification(slackWehookUrl, slackChannel, message) {
 
 async function main() {
   try {
-    const slackWehookUrl = core.getInput('slack-webhook-url');
-    const slackChannel = core.getInput('slack-channel');
-    const github2slackString = core.getInput('github-slack-map');
+    const webhookUrl = core.getInput('webhook-url');
+    const channel = core.getInput('channel');
+    const github2providerString = core.getInput('github-provider-map');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
@@ -964,9 +964,9 @@ async function main() {
     core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
     if (pullRequestsWithRequestedReviewers.length) {
       const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
-      const github2slack = stringToObject(github2slackString);
-      const message = prettyMessage(pr2user, github2slack);
-      await sendNotification(slackWehookUrl, slackChannel, message);
+      const github2provider = stringToObject(github2providerString);
+      const message = prettyMessage(pr2user, github2provider);
+      await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }
   } catch (error) {
