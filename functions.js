@@ -31,7 +31,7 @@ function prettyMessage(pr2user, github2provider) {
   let message = '';
   for (const obj of pr2user) {
     const mention = github2provider[obj.login] ? `<@${github2provider[obj.login]}>` : `@${obj.login}`;
-    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
+    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\r\n`;
   }
   return message;
 }

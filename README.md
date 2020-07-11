@@ -11,11 +11,11 @@ The webhook URL (required). More info [here (Slack)](https://api.slack.com/messa
 
 ### channel
 
-The channel name (eg: `#general`).
+The channel name, eg: `#general` (optional).
 
 ### github-provider-map
 
-A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack/Teams user IDs. Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
 
 ## Example usage
 
@@ -36,8 +36,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         webhook-url: '' # Required
-        channel: '' # Eg: #general
-        github-provider-map: '' # Eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
+        channel: '' # Optional, eg: #general
+        github-provider-map: '' # Optional, eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
 ```
 
 ## Bug or feedback?
