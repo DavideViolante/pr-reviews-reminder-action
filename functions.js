@@ -21,17 +21,17 @@ function stringToObject(str) {
   }
   const users = (str || '').split(',');
   users.forEach(user => {
-    const [github, slack] = user.split(':');
-    map[github] = slack
+    const [github, provider] = user.split(':');
+    map[github] = provider
   });
   return map;
 }
 
-function prettyMessage(pr2user, github2slack) {
+function prettyMessage(pr2user, github2provider) {
   let message = '';
   for (const obj of pr2user) {
-    const mention = github2slack[obj.login] ? `<@${github2slack[obj.login]}>` : `@${obj.login}`;
-    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
+    const mention = github2provider[obj.login] ? `<@${github2provider[obj.login]}>` : `@${obj.login}`;
+    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\r\n`;
   }
   return message;
 }
