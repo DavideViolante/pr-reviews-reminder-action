@@ -7,6 +7,7 @@ const {
   prettyMessage
 } = require("../functions");
 
+const provider = 'slack';
 // Mock milestones are ordered by due_on desc by GitHub APIs (no need to test it)
 const mockPullRequests = [
   {
@@ -139,26 +140,34 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   });
 
   it('Should print the pretty message, one reviewer per row (correct map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2provider);
-    const [firstRow, secondRow, thirdRow] = message.split('  \n');
+    const message = prettyMessage(mockPr2User, mockGithub2provider, provider);
+    const [firstRow, secondRow, thirdRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey <@ID123>, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey <@ID456>, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(thirdRow, 'Hey <@ID789>, this PR is waiting for your review: https://example.com/3');
   });
 
   it('Should print the pretty message, one reviewer per row (malformed map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed);
-    const [firstRow, secondRow] = message.split('  \n');
+    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, provider);
+    const [firstRow, secondRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
   });
 
   it('Should print the pretty message, one reviewer per row (no map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2providerNoData);
-    const [firstRow, secondRow, thirdRow] = message.split('  \n');
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, provider);
+    const [firstRow, secondRow, thirdRow] = message.split('\n');
     assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: https://example.com/1');
     assert.strictEqual(thirdRow, 'Hey @User3, this PR is waiting for your review: https://example.com/3');
+  });
+
+  it('Should print the pretty message, one reviewer per row (no map), MS Teams', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'msteams');
+    const [firstRow, secondRow, thirdRow] = message.split('  \n');
+    assert.strictEqual(firstRow, 'Hey @User1, this PR is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(secondRow, 'Hey @User2, this PR is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(thirdRow, 'Hey @User3, this PR is waiting for your review: [https://example.com/3](https://example.com/3)');
   });
 
 });

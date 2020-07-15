@@ -692,11 +692,18 @@ function stringToObject(str) {
   return map;
 }
 
-function prettyMessage(pr2user, github2provider) {
+function prettyMessage(pr2user, github2provider, provider) {
   let message = '';
   for (const obj of pr2user) {
     const mention = github2provider[obj.login] ? `<@${github2provider[obj.login]}>` : `@${obj.login}`;
-    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}  \n`;
+    switch (provider) {
+      case 'slack':
+        message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
+        break;
+      case 'msteams':
+        message += `Hey ${mention}, this PR is waiting for your review: [${obj.url}](${obj.url})  \n`;
+        break;
+    }
   }
   return message;
 }
@@ -955,6 +962,7 @@ function sendNotification(webhookUrl, channel, message) {
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');
+    const provider = core.getInput('provider');
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
     core.info('Getting open pull requests...');
@@ -965,7 +973,7 @@ async function main() {
     if (pullRequestsWithRequestedReviewers.length) {
       const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
       const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider);
+      const message = prettyMessage(pr2user, github2provider, provider);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }

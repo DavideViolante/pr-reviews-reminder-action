@@ -7,7 +7,11 @@ Action to send Slack/Teams notifications when there are pull requests pending fo
 
 ### webhook-url
 
-The webhook URL (required). More info [here (Slack)](https://api.slack.com/messaging/webhooks) and [here (Teams)](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using).
+The webhook URL (required). More info [here (Slack)](https://api.slack.com/messaging/webhooks) and [here (Teams)](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#setting-up-a-custom-incoming-webhook).
+
+### provider
+
+Chat provider, `slack` or `msteams` (required). Default `slack`.
 
 ### channel
 
@@ -31,11 +35,12 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v1.2.0
+    - uses: davideviolante/pr-reviews-reminder-action@v1.3.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         webhook-url: '' # Required
+        provider: '' # Required (slack or msteams)
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
 ```

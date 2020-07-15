@@ -27,11 +27,18 @@ function stringToObject(str) {
   return map;
 }
 
-function prettyMessage(pr2user, github2provider) {
+function prettyMessage(pr2user, github2provider, provider) {
   let message = '';
   for (const obj of pr2user) {
     const mention = github2provider[obj.login] ? `<@${github2provider[obj.login]}>` : `@${obj.login}`;
-    message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}  \n`;
+    switch (provider) {
+      case 'slack':
+        message += `Hey ${mention}, this PR is waiting for your review: ${obj.url}\n`;
+        break;
+      case 'msteams':
+        message += `Hey ${mention}, this PR is waiting for your review: [${obj.url}](${obj.url})  \n`;
+        break;
+    }
   }
   return message;
 }

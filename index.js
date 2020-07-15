@@ -39,6 +39,7 @@ function sendNotification(webhookUrl, channel, message) {
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');
+    const provider = core.getInput('provider');
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
     core.info('Getting open pull requests...');
@@ -49,7 +50,7 @@ async function main() {
     if (pullRequestsWithRequestedReviewers.length) {
       const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
       const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider);
+      const message = prettyMessage(pr2user, github2provider, provider);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }
