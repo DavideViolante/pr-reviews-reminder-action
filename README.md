@@ -3,6 +3,9 @@
 
 Action to send Slack/Teams notifications when there are pull requests pending for reviews.
 
+## Preview
+![Preview](https://raw.githubusercontent.com/DavideViolante/pr-reviews-reminder-action/master/preview.png "Preview")
+
 ## Inputs
 
 ### webhook-url
