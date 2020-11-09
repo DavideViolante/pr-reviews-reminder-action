@@ -24,6 +24,6 @@
   "devDependencies": {
     "@zeit/ncc": "^0.22.1",
     "eslint": "^7.0.0",
-    "mocha": "^7.1.2"
+    "mocha": "^8.2.1"
   }
 }
