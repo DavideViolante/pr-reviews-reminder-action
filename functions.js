@@ -1,5 +1,5 @@
 function getPullRequestsWithRequestedReviewers(pullRequests) {
-  return pullRequests.filter(pr => pr.requested_reviewers.length);
+  return pullRequests.filter(pr => pr.requested_reviewers.length || pr.requested_teams.length);
 }
 
 function createPr2UserArray(pullRequestsWithRequestedReview) {
@@ -11,6 +11,9 @@ function createPr2UserArray(pullRequestsWithRequestedReview) {
         title: pr.title,
         login: user.login
       });
+    }
+    for (const team of pr.requested_teams) {
+      pr2user.push({ url: pr.html_url, login: team.slug });
     }
   }
   return pr2user;
