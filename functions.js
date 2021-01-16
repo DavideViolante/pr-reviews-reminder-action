@@ -26,7 +26,7 @@ function stringToObject(str) {
   if (!str) {
     return map;
   }
-  const users = (str || '').split(',');
+  const users = str.split(',');
   users.forEach(user => {
     const [github, provider] = user.split(':');
     map[github] = provider
