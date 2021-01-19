@@ -12,6 +12,7 @@ const provider = 'slack';
 const mockPullRequests = [
   {
     number: 1,
+    title: 'Title1',
     html_url: 'https://example.com/1',
     requested_reviewers: [
       {
@@ -20,19 +21,50 @@ const mockPullRequests = [
       {
         login: 'User2'
       }
-    ]
+    ],
+    requested_teams: []
   },
   {
     number: 2,
+    title: 'Title2',
     html_url: 'https://example.com/2',
-    requested_reviewers: []
+    requested_reviewers: [],
+    requested_teams: []
   },
   {
     number: 3,
+    title: 'Title3',
     html_url: 'https://example.com/3',
     requested_reviewers: [
       {
         login: 'User3'
+      }
+    ],
+    requested_teams: []
+  },
+  {
+    number: 4,
+    title: 'Title4',
+    html_url: 'https://example.com/4',
+    requested_reviewers: [],
+    requested_teams: [
+      {
+        slug: 'Team1'
+      }
+    ]
+  },
+  {
+    number: 5,
+    title: 'Title5',
+    html_url: 'https://example.com/5',
+    requested_reviewers: [
+      {
+        login: 'User3'
+      }
+    ],
+    requested_teams: [
+      {
+        slug: 'Team1'
       }
     ]
   }
@@ -40,11 +72,15 @@ const mockPullRequests = [
 const mockPullRequestsNoReviewers = [
   {
     number: 1,
-    requested_reviewers: []
+    title: 'Title1',
+    requested_reviewers: [],
+    requested_teams: []
   },
   {
     number: 2,
-    requested_reviewers: []
+    title: 'Title2',
+    requested_reviewers: [],
+    requested_teams: []
   }
 ];
 const mockPullRequestsNoData = [];
@@ -84,7 +120,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   
   it('Should get pull requests with requested reviewers (some reviewers)', () => {
     const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequests);
-    assert.strictEqual(pullRequests.length, 2);
+    assert.strictEqual(pullRequests.length, 4);
   });
 
   it('Should get pull requests with requested reviewers (no reviewers)', () => {
@@ -99,13 +135,19 @@ describe('Pull Request Reviews Reminder Action tests', () => {
 
   it('Should create the array with pr and users (some reviewers)', () => {
     const array = createPr2UserArray(mockPullRequests);
-    assert.strictEqual(array.length, 3);
+    assert.strictEqual(array.length, 6);
     assert.strictEqual(array[0].login, 'User1');
     assert.strictEqual(array[0].url, 'https://example.com/1');
     assert.strictEqual(array[1].login, 'User2');
     assert.strictEqual(array[1].url, 'https://example.com/1');
     assert.strictEqual(array[2].login, 'User3');
     assert.strictEqual(array[2].url, 'https://example.com/3');
+    assert.strictEqual(array[3].login, 'Team1');
+    assert.strictEqual(array[3].url, 'https://example.com/4');
+    assert.strictEqual(array[4].login, 'User3');
+    assert.strictEqual(array[4].url, 'https://example.com/5');
+    assert.strictEqual(array[5].login, 'Team1');
+    assert.strictEqual(array[5].url, 'https://example.com/5');
   });
 
   it('Should create the array with pr and users (no reviewers)', () => {
