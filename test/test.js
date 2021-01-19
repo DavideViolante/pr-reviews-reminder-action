@@ -12,6 +12,7 @@ const provider = 'slack';
 const mockPullRequests = [
   {
     number: 1,
+    title: 'Title1',
     html_url: 'https://example.com/1',
     requested_reviewers: [
       {
@@ -25,12 +26,14 @@ const mockPullRequests = [
   },
   {
     number: 2,
+    title: 'Title2',
     html_url: 'https://example.com/2',
     requested_reviewers: [],
     requested_teams: []
   },
   {
     number: 3,
+    title: 'Title3',
     html_url: 'https://example.com/3',
     requested_reviewers: [
       {
@@ -41,6 +44,7 @@ const mockPullRequests = [
   },
   {
     number: 4,
+    title: 'Title4',
     html_url: 'https://example.com/4',
     requested_reviewers: [],
     requested_teams: [
@@ -51,6 +55,7 @@ const mockPullRequests = [
   },
   {
     number: 5,
+    title: 'Title5',
     html_url: 'https://example.com/5',
     requested_reviewers: [
       {
@@ -67,11 +72,13 @@ const mockPullRequests = [
 const mockPullRequestsNoReviewers = [
   {
     number: 1,
+    title: 'Title1',
     requested_reviewers: [],
     requested_teams: []
   },
   {
     number: 2,
+    title: 'Title2',
     requested_reviewers: [],
     requested_teams: []
   }
