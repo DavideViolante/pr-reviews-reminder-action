@@ -13,7 +13,11 @@ function createPr2UserArray(pullRequestsWithRequestedReview) {
       });
     }
     for (const team of pr.requested_teams) {
-      pr2user.push({ url: pr.html_url, login: team.slug });
+      pr2user.push({
+        url: pr.html_url,
+        title: pr.title,
+        login: team.slug
+      });
     }
   }
   return pr2user;

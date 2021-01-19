@@ -459,7 +459,11 @@ function createPr2UserArray(pullRequestsWithRequestedReview) {
       });
     }
     for (const team of pr.requested_teams) {
-      pr2user.push({ url: pr.html_url, login: team.slug });
+      pr2user.push({
+        url: pr.html_url,
+        title: pr.title,
+        login: team.slug
+      });
     }
   }
   return pr2user;
@@ -472,7 +476,7 @@ function stringToObject(str) {
   if (!str) {
     return map;
   }
-  const users = (str || '').split(',');
+  const users = str.split(',');
   users.forEach(user => {
     const [github, provider] = user.split(':');
     map[github] = provider
