@@ -1,11 +1,12 @@
+/* eslint-disable max-len */
 const assert = require('assert');
 
 const {
-  getPullRequestsWithRequestedReviewers,
+  getPullRequestsToReview,
   createPr2UserArray,
   stringToObject,
-  prettyMessage
-} = require("../functions");
+  prettyMessage,
+} = require('../functions');
 
 const provider = 'slack';
 // Mock milestones are ordered by due_on desc by GitHub APIs (no need to test it)
@@ -16,20 +17,20 @@ const mockPullRequests = [
     html_url: 'https://example.com/1',
     requested_reviewers: [
       {
-        login: 'User1'
+        login: 'User1',
       },
       {
-        login: 'User2'
-      }
+        login: 'User2',
+      },
     ],
-    requested_teams: []
+    requested_teams: [],
   },
   {
     number: 2,
     title: 'Title2',
     html_url: 'https://example.com/2',
     requested_reviewers: [],
-    requested_teams: []
+    requested_teams: [],
   },
   {
     number: 3,
@@ -37,10 +38,10 @@ const mockPullRequests = [
     html_url: 'https://example.com/3',
     requested_reviewers: [
       {
-        login: 'User3'
-      }
+        login: 'User3',
+      },
     ],
-    requested_teams: []
+    requested_teams: [],
   },
   {
     number: 4,
@@ -49,9 +50,9 @@ const mockPullRequests = [
     requested_reviewers: [],
     requested_teams: [
       {
-        slug: 'Team1'
-      }
-    ]
+        slug: 'Team1',
+      },
+    ],
   },
   {
     number: 5,
@@ -59,29 +60,29 @@ const mockPullRequests = [
     html_url: 'https://example.com/5',
     requested_reviewers: [
       {
-        login: 'User3'
-      }
+        login: 'User3',
+      },
     ],
     requested_teams: [
       {
-        slug: 'Team1'
-      }
-    ]
-  }
+        slug: 'Team1',
+      },
+    ],
+  },
 ];
 const mockPullRequestsNoReviewers = [
   {
     number: 1,
     title: 'Title1',
     requested_reviewers: [],
-    requested_teams: []
+    requested_teams: [],
   },
   {
     number: 2,
     title: 'Title2',
     requested_reviewers: [],
-    requested_teams: []
-  }
+    requested_teams: [],
+  },
 ];
 const mockPullRequestsNoData = [];
 const mockPr2User = [
@@ -99,7 +100,7 @@ const mockPr2User = [
     url: 'https://example.com/3',
     title: 'Title3',
     login: 'User3',
-  }
+  },
 ];
 const mockStringToConvert = 'name1:ID1,name2:ID2,name3:ID3';
 const mockStringToConvertOneUser = 'name1:ID1';
@@ -108,28 +109,27 @@ const mockStringToConvertNoData = '';
 const mockGithub2provider = {
   User1: 'ID123',
   User2: 'ID456',
-  User3: 'ID789'
+  User3: 'ID789',
 };
 const mockGithub2providerMalformed = {
   User1: undefined,
-  User2: undefined
-}
+  User2: undefined,
+};
 const mockGithub2providerNoData = {};
 
 describe('Pull Request Reviews Reminder Action tests', () => {
-  
   it('Should get pull requests with requested reviewers (some reviewers)', () => {
-    const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequests);
+    const pullRequests = getPullRequestsToReview(mockPullRequests);
     assert.strictEqual(pullRequests.length, 4);
   });
 
   it('Should get pull requests with requested reviewers (no reviewers)', () => {
-    const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequestsNoReviewers);
+    const pullRequests = getPullRequestsToReview(mockPullRequestsNoReviewers);
     assert.strictEqual(pullRequests.length, 0);
   });
-  
+
   it('Should get pull requests with requested reviewers (no PRs)', () => {
-    const pullRequests = getPullRequestsWithRequestedReviewers(mockPullRequestsNoData);
+    const pullRequests = getPullRequestsToReview(mockPullRequestsNoData);
     assert.strictEqual(pullRequests.length, 0);
   });
 
@@ -214,5 +214,4 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(secondRow, 'Hey @User2, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
     assert.strictEqual(thirdRow, 'Hey @User3, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
   });
-
 });

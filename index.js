@@ -3,26 +3,37 @@ const core = require('@actions/core');
 const axios = require('axios');
 
 const {
-  getPullRequestsWithRequestedReviewers,
+  getPullRequestsToReview,
   createPr2UserArray,
   prettyMessage,
-  stringToObject
-} = require("./functions");
+  stringToObject,
+} = require('./functions');
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
 const AUTH_HEADER = {
-  Authorization: `token ${GITHUB_TOKEN}`
+  Authorization: `token ${GITHUB_TOKEN}`,
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
+/**
+ * Get Pull Requests from GitHub repository
+ * @return {Array} List of Pull Requests
+ */
 function getPullRequests() {
   return axios({
     method: 'GET',
     url: PULLS_ENDPOINT,
-    headers: AUTH_HEADER
+    headers: AUTH_HEADER,
   });
 }
 
+/**
+ * Send notification to a channel
+ * @param {String} webhookUrl Webhook URL
+ * @param {String} channel Channel to send the notification to
+ * @param {String} message Message to send into the channel
+ * @return {void}
+ */
 function sendNotification(webhookUrl, channel, message) {
   return axios({
     method: 'POST',
@@ -31,10 +42,13 @@ function sendNotification(webhookUrl, channel, message) {
       channel: channel,
       username: 'Pull Request reviews reminder',
       text: message,
-    }
+    },
   });
 }
 
+/**
+ * Main function for the GitHub Action
+ */
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');
@@ -44,10 +58,10 @@ async function main() {
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
-    const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
-    core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
-    if (pullRequestsWithRequestedReviewers.length) {
-      const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
+    const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
+    core.info(`There are ${pullRequestsToReview.length} pull requests waiting for reviews`);
+    if (pullRequestsToReview.length) {
+      const pr2user = createPr2UserArray(pullRequestsToReview);
       const github2provider = stringToObject(github2providerString);
       const message = prettyMessage(pr2user, github2provider, provider);
       await sendNotification(webhookUrl, channel, message);
