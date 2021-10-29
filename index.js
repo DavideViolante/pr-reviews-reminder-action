@@ -9,8 +9,7 @@ const {
   stringToObject
 } = require("./functions");
 
-const GITHUB_API_URL = 'https://api.github.com';
-const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
+const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
 const AUTH_HEADER = {
   Authorization: `token ${GITHUB_TOKEN}`
 };
