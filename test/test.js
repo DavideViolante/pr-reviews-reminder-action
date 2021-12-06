@@ -3,6 +3,7 @@ const assert = require('assert');
 
 const {
   getPullRequestsToReview,
+  getPullRequestsWithoutLabel,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
@@ -131,6 +132,16 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should get pull requests with requested reviewers (no PRs)', () => {
     const pullRequests = getPullRequestsToReview(mockPullRequestsNoData);
     assert.strictEqual(pullRequests.length, 0);
+  });
+
+  it('Should get pull requests with requested reviewers and skip those with ignore label', () => {
+    mockPullRequests[1].labels = [{ name: 'ignore' }];
+    mockPullRequests[2].labels = [{ name: 'ignore' }];
+    const pullRequests = getPullRequestsToReview(mockPullRequests);
+    const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequests, 'ignore');
+    assert.strictEqual(pullRequestsWithoutLabel.length, 3);
+    delete mockPullRequests[1].labels;
+    delete mockPullRequests[2].labels;
   });
 
   it('Should create the array with pr and users (some reviewers)', () => {

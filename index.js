@@ -4,6 +4,7 @@ const axios = require('axios');
 
 const {
   getPullRequestsToReview,
+  getPullRequestsWithoutLabel,
   createPr2UserArray,
   prettyMessage,
   stringToObject,
@@ -55,15 +56,17 @@ async function main() {
     const provider = core.getInput('provider');
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
+    const ignoreLabel = core.getInput('ignore-label');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
     const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
-    core.info(`There are ${pullRequestsToReview.length} pull requests waiting for reviews`);
-    if (pullRequestsToReview.length) {
-      const pr2user = createPr2UserArray(pullRequestsToReview);
-      const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider, provider);
+    const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequestsToReview, ignoreLabel);
+    core.info(`There are ${pullRequestsWithoutLabel.length} pull requests waiting for reviews`);
+    if (pullRequestsWithoutLabel.length) {
+      const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
+      const github2providerObj = stringToObject(github2providerString);
+      const message = prettyMessage(pr2user, github2providerObj, provider);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }

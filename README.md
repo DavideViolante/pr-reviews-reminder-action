@@ -24,6 +24,10 @@ The channel name, eg: `#general` (optional).
 
 A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
 
+### ignore-label
+
+Ignore Pull Requests with that label, eg: `no-reminder` (optional).
+
 ## Example usage
 
 ```yaml
@@ -45,7 +49,8 @@ jobs:
         webhook-url: '' # Required
         provider: '' # Required (slack or msteams)
         channel: '' # Optional, eg: #general
-        github-provider-map: '' # Optional, eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
+        github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
+        ignore-label: '' # Optional, eg: no-reminder
 ```
 
 ## Bug or feedback?

@@ -450,12 +450,24 @@ module.exports = __webpack_require__(352);
 /***/ (function(module) {
 
 /**
- * Filter Pull Requests to get the one to review
+ * Filter Pull Requests with requested reviewers only
  * @param {Array} pullRequests Pull Requests to filter
  * @return {Array} Pull Requests to review
  */
 function getPullRequestsToReview(pullRequests) {
   return pullRequests.filter((pr) => pr.requested_reviewers.length || pr.requested_teams.length);
+}
+
+/**
+ * Filter Pull Requests without a specific label
+ * @param {Array} pullRequests Pull Requests to filter
+ * @param {String} ignoreLabel Pull Request label to ignore
+ * @return {Array} Pull Requests without a specific label
+ */
+function getPullRequestsWithoutLabel(pullRequests, ignoreLabel) {
+  return pullRequests.filter((pr) =>
+    !((pr.labels || []).some((label) => label.name === ignoreLabel))
+  );
 }
 
 /**
@@ -505,7 +517,7 @@ function stringToObject(str) {
 /**
  * Create a pretty message to print
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
- * @param {String} github2provider String containing usernames and IDs as "username:id,..."
+ * @param {Object} github2provider Object containing usernames as properties and IDs as values
  * @param {String} provider Service to use: slack or msteams
  * @return {String} Pretty message to print
  */
@@ -530,6 +542,7 @@ function prettyMessage(pr2user, github2provider, provider) {
 
 module.exports = {
   getPullRequestsToReview,
+  getPullRequestsWithoutLabel,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
@@ -920,6 +933,7 @@ const axios = __webpack_require__(53);
 
 const {
   getPullRequestsToReview,
+  getPullRequestsWithoutLabel,
   createPr2UserArray,
   prettyMessage,
   stringToObject,
@@ -971,15 +985,17 @@ async function main() {
     const provider = core.getInput('provider');
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
+    const ignoreLabel = core.getInput('ignore-label');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
     const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
-    core.info(`There are ${pullRequestsToReview.length} pull requests waiting for reviews`);
-    if (pullRequestsToReview.length) {
-      const pr2user = createPr2UserArray(pullRequestsToReview);
-      const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider, provider);
+    const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequestsToReview, ignoreLabel);
+    core.info(`There are ${pullRequestsWithoutLabel.length} pull requests waiting for reviews`);
+    if (pullRequestsWithoutLabel.length) {
+      const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
+      const github2providerObj = stringToObject(github2providerString);
+      const message = prettyMessage(pr2user, github2providerObj, provider);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }
