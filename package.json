@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/DavideViolante/pr-reviews-reminder-action#readme",
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.7.0",
     "axios": "^0.26.1"
   },
   "devDependencies": {
