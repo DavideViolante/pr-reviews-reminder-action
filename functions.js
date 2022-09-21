@@ -104,7 +104,22 @@ function getMsTeamsMentions(github2provider, pr2user) {
 }
 
 /**
- * Format the MS Teams message
+ * Formats channel and slack message text into a request object
+ * @param {*} channel channel to send the message to
+ * @param {*} message slack message text
+ * @return {Object} Slack message data object
+ */
+function formatSlackMessage(channel, message) {
+  const messageData = {
+    channel: channel,
+    username: 'Pull Request reviews reminder',
+    text: message,
+  };
+  return messageData;
+}
+
+/**
+ * Format the MS Teams message request object
  * @param {String} message formatted message string
  * @param {Array} msTeamsMentionObjects teams mention objects
  * @return {Object} Ms Teams message data object
@@ -145,4 +160,5 @@ module.exports = {
   prettyMessage,
   getMsTeamsMentions,
   formatMsTeamsMessage,
+  formatSlackMessage,
 };

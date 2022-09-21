@@ -7,6 +7,7 @@ const {
   stringToObject,
   prettyMessage,
   getMsTeamsMentions,
+  formatSlackMessage,
   formatMsTeamsMessage,
 } = require('../functions');
 
@@ -267,6 +268,18 @@ describe('Pull Request Reviews Reminder Action tests', () => {
         },
       },
     ]);
+  });
+
+  it('Should format a Slack request object properly', () => {
+    const channel = 'testChannel';
+    const message = 'testMessage';
+    const slackMessageObject = formatSlackMessage(channel, message);
+
+    assert.deepEqual(slackMessageObject, {
+      channel: 'testChannel',
+      username: 'Pull Request reviews reminder',
+      text: 'testMessage',
+    });
   });
 
   it('Should send a properly structured MS Teams message', () => {

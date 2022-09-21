@@ -8,6 +8,8 @@ const {
   prettyMessage,
   stringToObject,
   getMsTeamsMentions,
+  formatSlackMessage,
+  formatMsTeamsMessage,
 } = require('./functions');
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
@@ -29,31 +31,13 @@ function getPullRequests() {
 }
 
 /**
- * Send notification to a Slack channel
+ * Send notification to a channel
  * @param {String} webhookUrl Webhook URL
  * @param {String} channel Channel to send the notification to
- * @param {String} message Message to send into the channel
+ * @param {String} messageData Message data object to send into the channel
  * @return {void}
  */
-function sendSlackNotification(webhookUrl, channel, message) {
-  return axios({
-    method: 'POST',
-    url: webhookUrl,
-    data: {
-      channel: channel,
-      username: 'Pull Request reviews reminder',
-      text: message,
-    },
-  });
-}
-
-/**
- * Send notification to an MS Teams channel
- * @param {String} webhookUrl Webhook URL
- * @param {String} messageData MS Teams message data
- * @return {void}
- */
-function sendMsTeamsNotification(webhookUrl, messageData) {
+function sendNotification(webhookUrl, channel, messageData) {
   return axios({
     method: 'POST',
     url: webhookUrl,
@@ -78,17 +62,19 @@ async function main() {
     if (pullRequestsToReview.length) {
       const pr2user = createPr2UserArray(pullRequestsToReview);
       const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider, provider);
+      const messageText = prettyMessage(pr2user, github2provider, provider);
+      let messageObject;
 
       switch (provider) {
         case 'slack':
-          sendSlackNotification(webhookUrl, channel, message);
+          messageObject = formatSlackMessage(channel, message);
         case 'msteams': {
           const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
-          const msTeamsMessageObject = formatMsTeamsMessage(message, msTeamsMentions);
-          sendMsTeamsNotification(webhookUrl, msTeamsMessageObject);
+          messageObject = formatMsTeamsMessage(messageText, msTeamsMentions);
         }
       }
+
+      sendNotification(webhookUrl, messageObject);
       core.info(`Notification sent successfully!`);
     }
   } catch (error) {

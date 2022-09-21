@@ -779,7 +779,7 @@ function prettyMessage(pr2user, github2provider, provider) {
  * Create an array of MS teams mention objects for users requested in a review
  * @param {String} github2provider String containing usernames and IDs as "username:id,..."
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
- * @return {Array} Array of MS teams mention objects
+ * @return {Array} MS teams mention objects
  */
 function getMsTeamsMentions(github2provider, pr2user) {
   const github2providerEntries = Object.entries(github2provider);
@@ -796,12 +796,64 @@ function getMsTeamsMentions(github2provider, pr2user) {
   return x;
 }
 
+/**
+ * Formats channel and slack message text into a request object
+ * @param {*} channel channel to send the message to
+ * @param {*} message slack message text
+ * @return {Object} Slack message data object
+ */
+function formatSlackMessage(channel, message) {
+  const messageData = {
+    channel: channel,
+    username: 'Pull Request reviews reminder',
+    text: message,
+  };
+  return messageData;
+}
+
+/**
+ * Format the MS Teams message request object
+ * @param {String} message formatted message string
+ * @param {Array} msTeamsMentionObjects teams mention objects
+ * @return {Object} Ms Teams message data object
+ */
+function formatMsTeamsMessage(message, msTeamsMentionObjects) {
+  const messageData = {
+    type: `message`,
+    attachments: [
+      {
+        contentType: `application/vnd.microsoft.card.adaptive`,
+        content: {
+          type: `AdaptiveCard`,
+          body: [
+            {
+              type: `TextBlock`,
+              text: message,
+              wrap: true,
+            },
+          ],
+          $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+          version: `1.0`,
+          msteams: {
+            width: 'Full',
+            entities: msTeamsMentionObjects,
+          },
+        },
+      },
+    ],
+  };
+
+  return messageData;
+}
+
 module.exports = {
   getPullRequestsToReview,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
   getMsTeamsMentions,
+  formatMsTeamsMessage,
+  formatSlackMessage,
 };
 
 
@@ -1226,6 +1278,8 @@ const {
   prettyMessage,
   stringToObject,
   getMsTeamsMentions,
+  formatSlackMessage,
+  formatMsTeamsMessage,
 } = __webpack_require__(77);
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
@@ -1247,68 +1301,18 @@ function getPullRequests() {
 }
 
 /**
- * Send notification to a Slack channel
+ * Send notification to a channel
  * @param {String} webhookUrl Webhook URL
  * @param {String} channel Channel to send the notification to
- * @param {String} message Message to send into the channel
+ * @param {String} messageData Message data object to send into the channel
  * @return {void}
  */
-function sendSlackNotification(webhookUrl, channel, message) {
+function sendNotification(webhookUrl, channel, messageData) {
   return axios({
     method: 'POST',
     url: webhookUrl,
-    data: {
-      channel: channel,
-      username: 'Pull Request reviews reminder',
-      text: message,
-    },
+    data: messageData,
   });
-}
-
-/**
- * Send notification to an MS Teams channel
- * @param {String} webhookUrl Webhook URL
- * @param {String} message Message to send into the channel
- * @param {Array} msTeamsMentionObjects Array of MS teams mention objects
- * @return {void}
- */
-async function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
-  const data = {
-    type: `message`,
-    attachments: [
-      {
-        contentType: `application/vnd.microsoft.card.adaptive`,
-        content: {
-          type: `AdaptiveCard`,
-          body: [
-            {
-              type: `TextBlock`,
-              text: message,
-              wrap: true,
-            },
-          ],
-          $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
-          version: `1.0`,
-          msteams: {
-            width: 'Full',
-            entities: msTeamsMentionObjects,
-          },
-        },
-      },
-    ],
-  };
-
-  core.info(JSON.stringify(data));
-
-  const res = await axios({
-    method: 'POST',
-    url: webhookUrl,
-    data,
-  });
-
-  core.info(res.data);
-
-  return res.data;
 }
 
 /**
@@ -1328,16 +1332,19 @@ async function main() {
     if (pullRequestsToReview.length) {
       const pr2user = createPr2UserArray(pullRequestsToReview);
       const github2provider = stringToObject(github2providerString);
-      const message = prettyMessage(pr2user, github2provider, provider);
+      const messageText = prettyMessage(pr2user, github2provider, provider);
+      let messageObject;
 
       switch (provider) {
         case 'slack':
-          sendSlackNotification(webhookUrl, channel, message);
+          messageObject = formatSlackMessage(channel, message);
         case 'msteams': {
           const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
-          sendMsTeamsNotification(webhookUrl, message, msTeamsMentions);
+          messageObject = formatMsTeamsMessage(messageText, msTeamsMentions);
         }
       }
+
+      sendNotification(webhookUrl, messageObject);
       core.info(`Notification sent successfully!`);
     }
   } catch (error) {
