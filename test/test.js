@@ -7,6 +7,7 @@ const {
   stringToObject,
   prettyMessage,
   getMsTeamsMentions,
+  formatMsTeamsMessage,
 } = require('../functions');
 
 const provider = 'slack';
@@ -254,7 +255,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     ]);
   });
 
-  it('Shouldn\'t create MS Teams mention objects for users without reviews requested', () => {
+  it('Should not create MS Teams mention objects for users without reviews requested', () => {
     const msTeamsMentionObjects = getMsTeamsMentions(mockGithub2provider, [mockPr2User[0]]);
     assert.deepEqual(msTeamsMentionObjects, [
       {
@@ -266,5 +267,36 @@ describe('Pull Request Reviews Reminder Action tests', () => {
         },
       },
     ]);
+  });
+
+  it('Should send a properly structured MS Teams message', () => {
+    const message = 'testMessage';
+    const mentionObjects = [{ test: 'data' }];
+    const msTeamsMessageObject = formatMsTeamsMessage(message, mentionObjects);
+
+    assert.deepEqual(msTeamsMessageObject, {
+      type: `message`,
+      attachments: [
+        {
+          contentType: `application/vnd.microsoft.card.adaptive`,
+          content: {
+            type: `AdaptiveCard`,
+            body: [
+              {
+                type: `TextBlock`,
+                text: 'testMessage',
+                wrap: true,
+              },
+            ],
+            $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+            version: `1.0`,
+            msteams: {
+              width: 'Full',
+              entities: [{ test: 'data' }],
+            },
+          },
+        },
+      ],
+    });
   });
 });

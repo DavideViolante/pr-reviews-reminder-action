@@ -50,47 +50,15 @@ function sendSlackNotification(webhookUrl, channel, message) {
 /**
  * Send notification to an MS Teams channel
  * @param {String} webhookUrl Webhook URL
- * @param {String} message Message to send into the channel
- * @param {Array} msTeamsMentionObjects Array of MS teams mention objects
+ * @param {String} messageData MS Teams message data
  * @return {void}
  */
-async function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
-  const data = {
-    type: `message`,
-    attachments: [
-      {
-        contentType: `application/vnd.microsoft.card.adaptive`,
-        content: {
-          type: `AdaptiveCard`,
-          body: [
-            {
-              type: `TextBlock`,
-              text: message,
-              wrap: true,
-            },
-          ],
-          $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
-          version: `1.0`,
-          msteams: {
-            width: 'Full',
-            entities: msTeamsMentionObjects,
-          },
-        },
-      },
-    ],
-  };
-
-  core.info(JSON.stringify(data));
-
-  const res = await axios({
+function sendMsTeamsNotification(webhookUrl, messageData) {
+  return axios({
     method: 'POST',
     url: webhookUrl,
-    data,
+    data: messageData,
   });
-
-  core.info(res.data);
-
-  return res.data;
 }
 
 /**
@@ -117,7 +85,8 @@ async function main() {
           sendSlackNotification(webhookUrl, channel, message);
         case 'msteams': {
           const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
-          sendMsTeamsNotification(webhookUrl, message, msTeamsMentions);
+          const msTeamsMessageObject = formatMsTeamsMessage(message, msTeamsMentions);
+          sendMsTeamsNotification(webhookUrl, msTeamsMessageObject);
         }
       }
       core.info(`Notification sent successfully!`);

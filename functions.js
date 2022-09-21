@@ -86,7 +86,7 @@ function prettyMessage(pr2user, github2provider, provider) {
  * Create an array of MS teams mention objects for users requested in a review
  * @param {String} github2provider String containing usernames and IDs as "username:id,..."
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
- * @return {Array} Array of MS teams mention objects
+ * @return {Array} MS teams mention objects
  */
 function getMsTeamsMentions(github2provider, pr2user) {
   const github2providerEntries = Object.entries(github2provider);
@@ -103,10 +103,46 @@ function getMsTeamsMentions(github2provider, pr2user) {
   return x;
 }
 
+/**
+ * Format the MS Teams message
+ * @param {String} message formatted message string
+ * @param {Array} msTeamsMentionObjects teams mention objects
+ * @return {Object} Ms Teams message data object
+ */
+function formatMsTeamsMessage(message, msTeamsMentionObjects) {
+  const messageData = {
+    type: `message`,
+    attachments: [
+      {
+        contentType: `application/vnd.microsoft.card.adaptive`,
+        content: {
+          type: `AdaptiveCard`,
+          body: [
+            {
+              type: `TextBlock`,
+              text: message,
+              wrap: true,
+            },
+          ],
+          $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+          version: `1.0`,
+          msteams: {
+            width: 'Full',
+            entities: msTeamsMentionObjects,
+          },
+        },
+      },
+    ],
+  };
+
+  return messageData;
+}
+
 module.exports = {
   getPullRequestsToReview,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
   getMsTeamsMentions,
+  formatMsTeamsMessage,
 };
