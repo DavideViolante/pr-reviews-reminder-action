@@ -783,7 +783,7 @@ function prettyMessage(pr2user, github2provider, provider) {
  */
 function getMsTeamsMentions(github2provider, pr2user) {
   const github2providerEntries = Object.entries(github2provider);
-  const x = github2providerEntries.map(([githubId, providerId]) => ({
+  const mentionObjects = github2providerEntries.map(([githubId, providerId]) => ({
     type: `mention`,
     text: `<at>${githubId} UPN</at>`,
     mentioned: {
@@ -793,7 +793,7 @@ function getMsTeamsMentions(github2provider, pr2user) {
   })).filter((mention) => pr2user.find((item) => item.login === mention.mentioned.name));
   // Filter for users who have been requested in a review
 
-  return x;
+  return mentionObjects;
 }
 
 /**
