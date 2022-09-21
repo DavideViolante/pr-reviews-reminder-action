@@ -22,7 +22,9 @@ The channel name, eg: `#general` (optional).
 
 ### github-provider-map
 
-A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack/MS Teams user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+
+For MS Teams, the provider user ID can be an [MS teams user ID or a UPN](https://github.com/arranfw/pr-reviews-reminder-action/releases) Example: `"DavideViolante:davidviolant@onmicrosoft.com,foobar:foobar@onmicrosoft.com"`.
 
 ## Example usage
 
