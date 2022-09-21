@@ -54,7 +54,7 @@ function sendSlackNotification(webhookUrl, channel, message) {
  * @param {Array} msTeamsMentionObjects Array of MS teams mention objects
  * @return {void}
  */
-function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
+async function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
   const data = {
     type: `message`,
     attachments: [
@@ -78,12 +78,17 @@ function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
     ],
   };
 
-  console.log(data);
-  return axios({
+  core.info(JSON.stringify(data));
+
+  const res = await axios({
     method: 'POST',
     url: webhookUrl,
     data,
   });
+
+  core.info(res.data);
+
+  return res.data;
 }
 
 /**
@@ -110,7 +115,7 @@ async function main() {
           sendSlackNotification(webhookUrl, channel, message);
         case 'msteams': {
           const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
-          sendMsTeamsNotification(webhookUrl, channel, message, msTeamsMentions);
+          sendMsTeamsNotification(webhookUrl, message, msTeamsMentions);
         }
       }
       core.info(`Notification sent successfully!`);
