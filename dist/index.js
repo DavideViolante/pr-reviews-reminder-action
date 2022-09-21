@@ -1303,11 +1303,10 @@ function getPullRequests() {
 /**
  * Send notification to a channel
  * @param {String} webhookUrl Webhook URL
- * @param {String} channel Channel to send the notification to
  * @param {String} messageData Message data object to send into the channel
  * @return {void}
  */
-function sendNotification(webhookUrl, channel, messageData) {
+function sendNotification(webhookUrl, messageData) {
   return axios({
     method: 'POST',
     url: webhookUrl,
@@ -1344,7 +1343,7 @@ async function main() {
         }
       }
 
-      sendNotification(webhookUrl, messageObject);
+      await sendNotification(webhookUrl, messageObject);
       core.info(`Notification sent successfully!`);
     }
   } catch (error) {
