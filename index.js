@@ -66,11 +66,13 @@ async function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObject
             {
               type: `TextBlock`,
               text: message,
+              wrap: true,
             },
           ],
           $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
           version: `1.0`,
           msteams: {
+            width: 'Full',
             entities: msTeamsMentionObjects,
           },
         },
