@@ -61,20 +61,46 @@ function stringToObject(str) {
 function prettyMessage(pr2user, github2provider, provider) {
   let message = '';
   for (const obj of pr2user) {
-    const mention = github2provider[obj.login] ?
-      `<@${github2provider[obj.login]}>` :
-      `@${obj.login}`;
     switch (provider) {
-      case 'slack':
+      case 'slack': {
+        const mention = github2provider[obj.login] ?
+          `<@${github2provider[obj.login]}>` :
+          `@${obj.login}`;
         message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
         break;
-      case 'msteams':
+      }
+      case 'msteams': {
+        const mention = github2provider[obj.login] ?
+          `<at>${obj.login} UPN</at>` :
+          `@${obj.login}`;
         // eslint-disable-next-line max-len
         message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
         break;
+      }
     }
   }
   return message;
+}
+
+/**
+ * Create an array of MS teams mention objects for users requested in a review
+ * @param {String} github2provider String containing usernames and IDs as "username:id,..."
+ * @param {Array} pr2user Array of Object with these properties { url, title, login }
+ * @return {Array} Array of MS teams mention objects
+ */
+function getMsTeamsMentions(github2provider, pr2user) {
+  const github2providerEntries = Object.entries(github2provider);
+  const x = github2providerEntries.map(([githubId, providerId]) => ({
+    type: `mention`,
+    text: `<at>${githubId} UPN</at>`,
+    mentioned: {
+      id: providerId,
+      name: githubId,
+    },
+  })).filter((mention) => pr2user.find((item) => item.login === mention.mentioned.name));
+  // Filter for users who have been requested in a review
+
+  return x;
 }
 
 module.exports = {
@@ -82,4 +108,5 @@ module.exports = {
   createPr2UserArray,
   stringToObject,
   prettyMessage,
+  getMsTeamsMentions,
 };

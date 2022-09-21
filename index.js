@@ -7,6 +7,7 @@ const {
   createPr2UserArray,
   prettyMessage,
   stringToObject,
+  getMsTeamsMentions,
 } = require('./functions');
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
@@ -28,13 +29,13 @@ function getPullRequests() {
 }
 
 /**
- * Send notification to a channel
+ * Send notification to a Slack channel
  * @param {String} webhookUrl Webhook URL
  * @param {String} channel Channel to send the notification to
  * @param {String} message Message to send into the channel
  * @return {void}
  */
-function sendNotification(webhookUrl, channel, message) {
+function sendSlackNotification(webhookUrl, channel, message) {
   return axios({
     method: 'POST',
     url: webhookUrl,
@@ -43,6 +44,45 @@ function sendNotification(webhookUrl, channel, message) {
       username: 'Pull Request reviews reminder',
       text: message,
     },
+  });
+}
+
+/**
+ * Send notification to an MS Teams channel
+ * @param {String} webhookUrl Webhook URL
+ * @param {String} message Message to send into the channel
+ * @param {Array} msTeamsMentionObjects Array of MS teams mention objects
+ * @return {void}
+ */
+function sendMsTeamsNotification(webhookUrl, message, msTeamsMentionObjects) {
+  const data = {
+    type: `message`,
+    attachments: [
+      {
+        contentType: `application/vnd.microsoft.card.adaptive`,
+        content: {
+          type: `AdaptiveCard`,
+          body: [
+            {
+              type: `TextBlock`,
+              text: message,
+            },
+          ],
+          $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+          version: `1.0`,
+          msteams: {
+            entities: msTeamsMentionObjects,
+          },
+        },
+      },
+    ],
+  };
+
+  console.log(data);
+  return axios({
+    method: 'POST',
+    url: webhookUrl,
+    data,
   });
 }
 
@@ -64,7 +104,15 @@ async function main() {
       const pr2user = createPr2UserArray(pullRequestsToReview);
       const github2provider = stringToObject(github2providerString);
       const message = prettyMessage(pr2user, github2provider, provider);
-      await sendNotification(webhookUrl, channel, message);
+
+      switch (provider) {
+        case 'slack':
+          sendSlackNotification(webhookUrl, channel, message);
+        case 'msteams': {
+          const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
+          sendMsTeamsNotification(webhookUrl, channel, message, msTeamsMentions);
+        }
+      }
       core.info(`Notification sent successfully!`);
     }
   } catch (error) {
