@@ -97,10 +97,14 @@ function getMsTeamsMentions(github2provider, pr2user) {
       id: providerId,
       name: githubId,
     },
-  })).filter((mention) => pr2user.find((item) => item.login === mention.mentioned.name));
-  // Filter for users who have been requested in a review
+  }));
 
-  return mentionObjects;
+  // Filter for users who have been requested in a review
+  const mentionObjectsForPrUsers = mentionObjects.filter((mention) =>
+    pr2user.find((item) => item.login === mention.mentioned.name),
+  );
+
+  return mentionObjectsForPrUsers;
 }
 
 /**
