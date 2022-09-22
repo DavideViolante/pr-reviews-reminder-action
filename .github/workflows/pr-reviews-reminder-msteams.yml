@@ -1,6 +1,6 @@
-name: PRs reviews reminder (self testing)
+name: PRs reviews reminder (self testing for MS Teams)
 
-on: ["pull_request"]
+on: ["push", "pull_request"]
 
 jobs:
   pr-reviews-reminder:

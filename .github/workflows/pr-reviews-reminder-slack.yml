@@ -1,0 +1,16 @@
+name: PRs reviews reminder (self testing for Slack)
+
+on: ["push", "pull_request"]
+
+jobs:
+  pr-reviews-reminder:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: davideviolante/pr-reviews-reminder-action@v1.6.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        webhook-url: 'https://hooks.slack.com/services/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' # Required
+        provider: 'slack' # Required (slack or msteams)
+        channel: '' # Optional, eg: #general
+        github-provider-map: '' # Optional, eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
