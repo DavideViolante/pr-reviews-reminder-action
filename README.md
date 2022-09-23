@@ -28,6 +28,10 @@ For MS Teams, the provider user ID can be an [MS teams user ID or a UPN](https:/
 
 Another hacky way (no code) to find the MS Teams UPN is the following: open MS Teams on your browser, click the 3 dots near your Team name, click Add member, open Google Chrome console Network tab Fetch/XHR category, type the email address, look for "searchV2" in the Network tab, click Response tab.
 
+### ignore-label
+
+Ignore Pull Requests with that label, eg: `no-reminder` (optional).
+
 ## Example usage
 
 ```yaml
@@ -42,14 +46,15 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v2.0.0
+    - uses: davideviolante/pr-reviews-reminder-action@v2.1.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         webhook-url: '' # Required
         provider: '' # Required (slack or msteams)
         channel: '' # Optional, eg: #general
-        github-provider-map: '' # Optional, eg: "DavideViolante:UEABCDEFG,foobar:UAABCDEFG"
+        github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
+        ignore-label: '' # Optional, eg: no-reminder
 ```
 
 ## Bug or feedback?

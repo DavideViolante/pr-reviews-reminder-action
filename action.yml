@@ -19,6 +19,10 @@ inputs:
     description: 'Map GitHub username to Slack user IDs. Eg: "DavideViolante:UABCDEFGH,foobar123:UIHJKLMNO"'
     required: false
     default: false
+  ignore-label:
+    description: 'Ignore Pull Requests with that label'
+    required: false
+    default: ''
 runs:
   using: 'node12'
   main: 'dist/index.js'

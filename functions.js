@@ -1,10 +1,22 @@
 /**
- * Filter Pull Requests to get the one to review
+ * Filter Pull Requests with requested reviewers only
  * @param {Array} pullRequests Pull Requests to filter
  * @return {Array} Pull Requests to review
  */
 function getPullRequestsToReview(pullRequests) {
   return pullRequests.filter((pr) => pr.requested_reviewers.length || pr.requested_teams.length);
+}
+
+/**
+ * Filter Pull Requests without a specific label
+ * @param {Array} pullRequests Pull Requests to filter
+ * @param {String} ignoreLabel Pull Request label to ignore
+ * @return {Array} Pull Requests without a specific label
+ */
+function getPullRequestsWithoutLabel(pullRequests, ignoreLabel) {
+  return pullRequests.filter((pr) =>
+    !((pr.labels || []).some((label) => label.name === ignoreLabel)),
+  );
 }
 
 /**
@@ -54,7 +66,7 @@ function stringToObject(str) {
 /**
  * Create a pretty message to print
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
- * @param {String} github2provider String containing usernames and IDs as "username:id,..."
+ * @param {Object} github2provider Object containing usernames as properties and IDs as values
  * @param {String} provider Service to use: slack or msteams
  * @return {String} Pretty message to print
  */
@@ -159,6 +171,7 @@ function formatMsTeamsMessage(message, msTeamsMentionObjects) {
 
 module.exports = {
   getPullRequestsToReview,
+  getPullRequestsWithoutLabel,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
