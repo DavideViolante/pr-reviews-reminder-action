@@ -790,16 +790,20 @@ function getMsTeamsMentions(github2provider, pr2user) {
       id: providerId,
       name: githubId,
     },
-  })).filter((mention) => pr2user.find((item) => item.login === mention.mentioned.name));
-  // Filter for users who have been requested in a review
+  }));
 
-  return mentionObjects;
+  // Filter for users who have been requested in a review
+  const mentionObjectsForPrUsers = mentionObjects.filter((mention) =>
+    pr2user.find((item) => item.login === mention.mentioned.name),
+  );
+
+  return mentionObjectsForPrUsers;
 }
 
 /**
  * Formats channel and slack message text into a request object
- * @param {*} channel channel to send the message to
- * @param {*} message slack message text
+ * @param {String} channel channel to send the message to
+ * @param {String} message slack message text
  * @return {Object} Slack message data object
  */
 function formatSlackMessage(channel, message) {
