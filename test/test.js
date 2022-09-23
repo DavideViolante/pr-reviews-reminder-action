@@ -140,13 +140,16 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should get pull requests with requested reviewers and skip those with ignore label', () => {
     mockPullRequests[1].labels = [{ name: 'ignore' }];
     mockPullRequests[2].labels = [{ name: 'ignore' }];
+    mockPullRequests[3].labels = [{ name: 'ignore' }];
     const pullRequests = getPullRequestsToReview(mockPullRequests);
     assert.strictEqual(pullRequests.length, 4);
     const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequests, 'ignore');
-    assert.strictEqual(pullRequestsWithoutLabel.length, 3);
+    assert.strictEqual(pullRequestsWithoutLabel.length, 2);
     delete mockPullRequests[1].labels;
     delete mockPullRequests[2].labels;
+    delete mockPullRequests[3].labels;
   });
+
 
   it('Should create the array with pr and users (some reviewers)', () => {
     const array = createPr2UserArray(mockPullRequests);
