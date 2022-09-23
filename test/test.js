@@ -7,6 +7,9 @@ const {
   createPr2UserArray,
   stringToObject,
   prettyMessage,
+  getMsTeamsMentions,
+  formatSlackMessage,
+  formatMsTeamsMessage,
 } = require('../functions');
 
 const provider = 'slack';
@@ -224,5 +227,100 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(firstRow, 'Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
     assert.strictEqual(secondRow, 'Hey @User2, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
     assert.strictEqual(thirdRow, 'Hey @User3, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+  });
+
+  it('Should print the pretty message, one reviewer per row, MS Teams', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'msteams');
+    const [firstRow, secondRow, thirdRow] = message.split('  \n');
+    assert.strictEqual(firstRow, 'Hey <at>User1 UPN</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(secondRow, 'Hey <at>User2 UPN</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(thirdRow, 'Hey <at>User3 UPN</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+  });
+
+  it('Should create MS Teams mention objects in the correct shape with the correct data', () => {
+    const msTeamsMentionObjects = getMsTeamsMentions(mockGithub2provider, mockPr2User);
+    assert.deepEqual(msTeamsMentionObjects, [
+      {
+        type: 'mention',
+        text: `<at>User1 UPN</at>`,
+        mentioned: {
+          id: 'ID123',
+          name: 'User1',
+        },
+      },
+      {
+        type: 'mention',
+        text: `<at>User2 UPN</at>`,
+        mentioned: {
+          id: 'ID456',
+          name: 'User2',
+        },
+      },
+      {
+        type: 'mention',
+        text: `<at>User3 UPN</at>`,
+        mentioned: {
+          id: 'ID789',
+          name: 'User3',
+        },
+      },
+    ]);
+  });
+
+  it('Should not create MS Teams mention objects for users without reviews requested', () => {
+    const msTeamsMentionObjects = getMsTeamsMentions(mockGithub2provider, [mockPr2User[0]]);
+    assert.deepEqual(msTeamsMentionObjects, [
+      {
+        type: 'mention',
+        text: `<at>User1 UPN</at>`,
+        mentioned: {
+          id: 'ID123',
+          name: 'User1',
+        },
+      },
+    ]);
+  });
+
+  it('Should format a Slack request object properly', () => {
+    const channel = 'testChannel';
+    const message = 'testMessage';
+    const slackMessageObject = formatSlackMessage(channel, message);
+
+    assert.deepEqual(slackMessageObject, {
+      channel: 'testChannel',
+      username: 'Pull Request reviews reminder',
+      text: 'testMessage',
+    });
+  });
+
+  it('Should send a properly structured MS Teams message', () => {
+    const message = 'testMessage';
+    const mentionObjects = [{ test: 'data' }];
+    const msTeamsMessageObject = formatMsTeamsMessage(message, mentionObjects);
+
+    assert.deepEqual(msTeamsMessageObject, {
+      type: `message`,
+      attachments: [
+        {
+          contentType: `application/vnd.microsoft.card.adaptive`,
+          content: {
+            type: `AdaptiveCard`,
+            body: [
+              {
+                type: `TextBlock`,
+                text: 'testMessage',
+                wrap: true,
+              },
+            ],
+            $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+            version: `1.0`,
+            msteams: {
+              width: 'Full',
+              entities: [{ test: 'data' }],
+            },
+          },
+        },
+      ],
+    });
   });
 });

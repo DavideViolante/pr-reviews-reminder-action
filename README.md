@@ -22,7 +22,11 @@ The channel name, eg: `#general` (optional).
 
 ### github-provider-map
 
-A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+A string like this `"githubusername1:provideruserid1,githubusername2:provideruserid2,..."` to define the mapping between GitHub usernames and Slack/MS Teams user IDs (optional). Example: `"DavideViolante:UEABCDEFG,foobar:UAABCDEFG"`. Note: it's case sensitive! [How to find Slack User IDs](https://www.google.com/search?q=find+slack+user+id).
+
+For MS Teams, the provider user ID can be an [MS teams user ID or a UPN](https://www.google.com/search?q=find+%22microsoft+teams%22+userprincipalname+-office) Example: `"DavideViolante:admin@DavideViolante.onmicrosoft.com',foobar:foobar@foobar.onmicrosoft.com"`.
+
+Another hacky way (no code) to find the MS Teams UPN is the following: open MS Teams on your browser, click the 3 dots near your Team name, click Add member, open Google Chrome console Network tab Fetch/XHR category, type the email address, look for "searchV2" in the Network tab, click Response tab.
 
 ### ignore-label
 
@@ -42,7 +46,7 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v1.7.0
+    - uses: davideviolante/pr-reviews-reminder-action@v2.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
