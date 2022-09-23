@@ -150,7 +150,6 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     delete mockPullRequests[3].labels;
   });
 
-
   it('Should create the array with pr and users (some reviewers)', () => {
     const array = createPr2UserArray(mockPullRequests);
     assert.strictEqual(array.length, 6);
