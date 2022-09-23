@@ -141,6 +141,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     mockPullRequests[1].labels = [{ name: 'ignore' }];
     mockPullRequests[2].labels = [{ name: 'ignore' }];
     const pullRequests = getPullRequestsToReview(mockPullRequests);
+    assert.strictEqual(pullRequests.length, 4);
     const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequests, 'ignore');
     assert.strictEqual(pullRequestsWithoutLabel.length, 3);
     delete mockPullRequests[1].labels;
