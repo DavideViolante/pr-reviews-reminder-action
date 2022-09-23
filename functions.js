@@ -15,7 +15,7 @@ function getPullRequestsToReview(pullRequests) {
  */
 function getPullRequestsWithoutLabel(pullRequests, ignoreLabel) {
   return pullRequests.filter((pr) =>
-    !((pr.labels || []).some((label) => label.name === ignoreLabel))
+    !((pr.labels || []).some((label) => label.name === ignoreLabel)),
   );
 }
 
