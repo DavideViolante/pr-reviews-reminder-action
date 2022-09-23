@@ -1,6 +1,6 @@
 {
   "name": "pr-reviews-reminder-action",
-  "version": "1.6.2",
+  "version": "2.0.0",
   "description": "Reminder for Pull Request pending reviews",
   "scripts": {
     "build": "ncc build index.js",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@zeit/ncc": "^0.22.3",
-    "eslint": "^8.23.0",
+    "eslint": "^8.23.1",
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0"
