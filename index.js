@@ -21,9 +21,9 @@ const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
 /**
  * Get Pull Requests from GitHub repository
- * @return {Array} List of Pull Requests
+ * @return {Promise} Axios promise
  */
-function getPullRequests() {
+async function getPullRequests() {
   return axios({
     method: 'GET',
     url: PULLS_ENDPOINT,
@@ -35,9 +35,9 @@ function getPullRequests() {
  * Send notification to a channel
  * @param {String} webhookUrl Webhook URL
  * @param {String} messageData Message data object to send into the channel
- * @return {void}
+ * @return {Promise} Axios promise
  */
-function sendNotification(webhookUrl, messageData) {
+async function sendNotification(webhookUrl, messageData) {
   return axios({
     method: 'POST',
     url: webhookUrl,
@@ -68,10 +68,12 @@ async function main() {
       let messageObject;
       switch (provider) {
         case 'slack':
-          messageObject = formatSlackMessage(channel, message);
+          messageObject = formatSlackMessage(channel, messageText);
+          break;
         case 'msteams': {
           const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
           messageObject = formatMsTeamsMessage(messageText, msTeamsMentions);
+          break;
         }
       }
       await sendNotification(webhookUrl, messageObject);
