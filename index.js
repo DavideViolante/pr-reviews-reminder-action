@@ -61,8 +61,8 @@ async function main() {
     const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
     const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequestsToReview, ignoreLabel);
     core.info(`There are ${pullRequestsWithoutLabel.length} pull requests waiting for reviews`);
-    if (pullRequestsToReview.length) {
-      const pr2user = createPr2UserArray(pullRequestsToReview);
+    if (pullRequestsWithoutLabel.length) {
+      const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
       const github2provider = stringToObject(github2providerString);
       const messageText = prettyMessage(pr2user, github2provider, provider);
       let messageObject;
