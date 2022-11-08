@@ -83,7 +83,7 @@ function prettyMessage(pr2user, github2provider, provider) {
       }
       case 'msteams': {
         const mention = github2provider[obj.login] ?
-          `<at>${obj.login} UPN</at>` :
+          `<at>${obj.login}</at>` :
           `@${obj.login}`;
         // eslint-disable-next-line max-len
         message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
@@ -104,7 +104,7 @@ function getMsTeamsMentions(github2provider, pr2user) {
   const github2providerEntries = Object.entries(github2provider);
   const mentionObjects = github2providerEntries.map(([githubId, providerId]) => ({
     type: `mention`,
-    text: `<at>${githubId} UPN</at>`,
+    text: `<at>${githubId}</at>`,
     mentioned: {
       id: providerId,
       name: githubId,

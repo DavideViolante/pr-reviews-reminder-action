@@ -235,9 +235,9 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should print the pretty message, one reviewer per row, MS Teams', () => {
     const message = prettyMessage(mockPr2User, mockGithub2provider, 'msteams');
     const [firstRow, secondRow, thirdRow] = message.split('  \n');
-    assert.strictEqual(firstRow, 'Hey <at>User1 UPN</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(secondRow, 'Hey <at>User2 UPN</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(thirdRow, 'Hey <at>User3 UPN</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    assert.strictEqual(firstRow, 'Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(secondRow, 'Hey <at>User2</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(thirdRow, 'Hey <at>User3</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
   });
 
   it('Should create MS Teams mention objects in the correct shape with the correct data', () => {
@@ -245,7 +245,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.deepEqual(msTeamsMentionObjects, [
       {
         type: 'mention',
-        text: `<at>User1 UPN</at>`,
+        text: `<at>User1</at>`,
         mentioned: {
           id: 'ID123',
           name: 'User1',
@@ -253,7 +253,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
       },
       {
         type: 'mention',
-        text: `<at>User2 UPN</at>`,
+        text: `<at>User2</at>`,
         mentioned: {
           id: 'ID456',
           name: 'User2',
@@ -261,7 +261,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
       },
       {
         type: 'mention',
-        text: `<at>User3 UPN</at>`,
+        text: `<at>User3</at>`,
         mentioned: {
           id: 'ID789',
           name: 'User3',
@@ -275,7 +275,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.deepEqual(msTeamsMentionObjects, [
       {
         type: 'mention',
-        text: `<at>User1 UPN</at>`,
+        text: `<at>User1</at>`,
         mentioned: {
           id: 'ID123',
           name: 'User1',
