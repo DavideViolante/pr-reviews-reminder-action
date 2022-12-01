@@ -85,7 +85,6 @@ function prettyMessage(pr2user, github2provider, provider) {
         const mention = github2provider[obj.login] ?
           `<at>${obj.login}</at>` :
           `@${obj.login}`;
-        // eslint-disable-next-line max-len
         message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
         break;
       }
@@ -96,27 +95,24 @@ function prettyMessage(pr2user, github2provider, provider) {
 
 /**
  * Create an array of MS teams mention objects for users requested in a review
- * @param {String} github2provider String containing usernames and IDs as "username:id,..."
+ * Docs: https://bit.ly/3UlOoqo
+ * @param {Object} github2provider Object containing usernames as properties and IDs as values
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
  * @return {Array} MS teams mention objects
  */
-function getMsTeamsMentions(github2provider, pr2user) {
-  const github2providerEntries = Object.entries(github2provider);
-  const mentionObjects = github2providerEntries.map(([githubId, providerId]) => ({
-    type: `mention`,
-    text: `<at>${githubId}</at>`,
-    mentioned: {
-      id: providerId,
-      name: githubId,
-    },
-  }));
-
-  // Filter for users who have been requested in a review
-  const mentionObjectsForPrUsers = mentionObjects.filter((mention) =>
-    pr2user.find((item) => item.login === mention.mentioned.name),
-  );
-
-  return mentionObjectsForPrUsers;
+function getTeamsMentions(github2provider, pr2user) {
+  const mentions = [];
+  for (const user of pr2user) {
+    mentions.push({
+      type: `mention`,
+      text: `<at>${user.login}</at>`,
+      mentioned: {
+        id: github2provider[user.login],
+        name: user.login,
+      },
+    });
+  }
+  return mentions;
 }
 
 /**
@@ -136,11 +132,12 @@ function formatSlackMessage(channel, message) {
 
 /**
  * Format the MS Teams message request object
+ * Docs: https://bit.ly/3UlOoqo
  * @param {String} message formatted message string
- * @param {Array} msTeamsMentionObjects teams mention objects
+ * @param {Array} mentionsArray teams mention objects
  * @return {Object} Ms Teams message data object
  */
-function formatMsTeamsMessage(message, msTeamsMentionObjects) {
+function formatTeamsMessage(message, mentionsArray) {
   const messageData = {
     type: `message`,
     attachments: [
@@ -159,7 +156,7 @@ function formatMsTeamsMessage(message, msTeamsMentionObjects) {
           version: `1.0`,
           msteams: {
             width: 'Full',
-            entities: msTeamsMentionObjects,
+            entities: mentionsArray,
           },
         },
       },
@@ -175,7 +172,7 @@ module.exports = {
   createPr2UserArray,
   stringToObject,
   prettyMessage,
-  getMsTeamsMentions,
-  formatMsTeamsMessage,
+  getTeamsMentions,
+  formatTeamsMessage,
   formatSlackMessage,
 };
