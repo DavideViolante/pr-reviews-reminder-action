@@ -13,7 +13,6 @@ const {
 } = require('../functions');
 
 const provider = 'slack';
-// Mock milestones are ordered by due_on desc by GitHub APIs (no need to test it)
 const mockPullRequests = [
   {
     number: 1,
