@@ -7,12 +7,11 @@ const {
   createPr2UserArray,
   stringToObject,
   prettyMessage,
-  getMsTeamsMentions,
+  getTeamsMentions,
   formatSlackMessage,
-  formatMsTeamsMessage,
+  formatTeamsMessage,
 } = require('../functions');
 
-const provider = 'slack';
 const mockPullRequests = [
   {
     number: 1,
@@ -63,7 +62,7 @@ const mockPullRequests = [
     html_url: 'https://example.com/5',
     requested_reviewers: [
       {
-        login: 'User3',
+        login: 'User2',
       },
     ],
     requested_teams: [
@@ -104,6 +103,11 @@ const mockPr2User = [
     title: 'Title3',
     login: 'User3',
   },
+  {
+    url: 'https://example.com/5',
+    title: 'Title5',
+    login: 'User2',
+  },
 ];
 const mockStringToConvert = 'name1:ID1,name2:ID2,name3:ID3';
 const mockStringToConvertOneUser = 'name1:ID1';
@@ -119,6 +123,64 @@ const mockGithub2providerMalformed = {
   User2: undefined,
 };
 const mockGithub2providerNoData = {};
+const mockTeamsMentions = [
+  {
+    type: `mention`,
+    text: `<at>User1</at>`,
+    mentioned: {
+      id: 'ID123',
+      name: 'User1',
+    },
+  },
+  {
+    type: `mention`,
+    text: `<at>User2</at>`,
+    mentioned: {
+      id: 'ID456',
+      name: 'User2',
+    },
+  },
+  {
+    type: `mention`,
+    text: `<at>User3</at>`,
+    mentioned: {
+      id: 'ID789',
+      name: 'User3',
+    },
+  },
+  {
+    type: `mention`,
+    text: `<at>User2</at>`,
+    mentioned: {
+      id: 'ID456',
+      name: 'User2',
+    },
+  },
+];
+const mockTeamsMessageRequest = {
+  type: `message`,
+  attachments: [
+    {
+      contentType: `application/vnd.microsoft.card.adaptive`,
+      content: {
+        type: `AdaptiveCard`,
+        body: [
+          {
+            type: `TextBlock`,
+            text: 'Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)',
+            wrap: true,
+          },
+        ],
+        $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+        version: `1.0`,
+        msteams: {
+          width: 'Full',
+          entities: mockTeamsMentions,
+        },
+      },
+    },
+  ],
+};
 
 describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should get pull requests with requested reviewers (some reviewers)', () => {
@@ -160,7 +222,7 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(array[2].url, 'https://example.com/3');
     assert.strictEqual(array[3].login, 'Team1');
     assert.strictEqual(array[3].url, 'https://example.com/4');
-    assert.strictEqual(array[4].login, 'User3');
+    assert.strictEqual(array[4].login, 'User2');
     assert.strictEqual(array[4].url, 'https://example.com/5');
     assert.strictEqual(array[5].login, 'Team1');
     assert.strictEqual(array[5].url, 'https://example.com/5');
@@ -200,129 +262,80 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(typeof obj, 'object');
   });
 
-  it('Should print the pretty message, one reviewer per row (correct map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2provider, provider);
-    const [firstRow, secondRow, thirdRow] = message.split('\n');
-    assert.strictEqual(firstRow, 'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(secondRow, 'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(thirdRow, 'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3');
+  it('Should print the pretty message, one reviewer per row, Slack (correct map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5');
   });
 
-  it('Should print the pretty message, one reviewer per row (malformed map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, provider);
-    const [firstRow, secondRow] = message.split('\n');
-    assert.strictEqual(firstRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(secondRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+  it('Should print the pretty message, one reviewer per row, Slack (malformed map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, 'slack');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
   });
 
-  it('Should print the pretty message, one reviewer per row (no map)', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, provider);
-    const [firstRow, secondRow, thirdRow] = message.split('\n');
-    assert.strictEqual(firstRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(secondRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(thirdRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
+  it('Should print the pretty message, one reviewer per row, Slack (no map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'slack');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
   });
 
-  it('Should print the pretty message, one reviewer per row (no map), MS Teams', () => {
-    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'msteams');
-    const [firstRow, secondRow, thirdRow] = message.split('  \n');
-    assert.strictEqual(firstRow, 'Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(secondRow, 'Hey @User2, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(thirdRow, 'Hey @User3, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
-  });
-
-  it('Should print the pretty message, one reviewer per row, MS Teams', () => {
+  it('Should print the pretty message, one reviewer per row, Teams (correct map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2provider, 'msteams');
-    const [firstRow, secondRow, thirdRow] = message.split('  \n');
-    assert.strictEqual(firstRow, 'Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(secondRow, 'Hey <at>User2</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
-    assert.strictEqual(thirdRow, 'Hey <at>User3</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    const [aRow, bRow, cRow, dRow] = message.split('  \n');
+    assert.strictEqual(aRow, 'Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(bRow, 'Hey <at>User2</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(cRow, 'Hey <at>User3</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    assert.strictEqual(dRow, 'Hey <at>User2</at>, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
   });
 
-  it('Should create MS Teams mention objects in the correct shape with the correct data', () => {
-    const msTeamsMentionObjects = getMsTeamsMentions(mockGithub2provider, mockPr2User);
-    assert.deepEqual(msTeamsMentionObjects, [
-      {
-        type: 'mention',
-        text: `<at>User1</at>`,
-        mentioned: {
-          id: 'ID123',
-          name: 'User1',
-        },
-      },
-      {
-        type: 'mention',
-        text: `<at>User2</at>`,
-        mentioned: {
-          id: 'ID456',
-          name: 'User2',
-        },
-      },
-      {
-        type: 'mention',
-        text: `<at>User3</at>`,
-        mentioned: {
-          id: 'ID789',
-          name: 'User3',
-        },
-      },
-    ]);
+  it('Should print the pretty message, one reviewer per row, Teams (malformed map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, 'msteams');
+    const [aRow, bRow, cRow, dRow] = message.split('  \n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
   });
 
-  it('Should not create MS Teams mention objects for users without reviews requested', () => {
-    const msTeamsMentionObjects = getMsTeamsMentions(mockGithub2provider, [mockPr2User[0]]);
-    assert.deepEqual(msTeamsMentionObjects, [
-      {
-        type: 'mention',
-        text: `<at>User1</at>`,
-        mentioned: {
-          id: 'ID123',
-          name: 'User1',
-        },
-      },
-    ]);
+  it('Should print the pretty message, one reviewer per row, Teams (no map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'msteams');
+    const [aRow, bRow, cRow, dRow] = message.split('  \n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
   });
 
-  it('Should format a Slack request object properly', () => {
-    const channel = 'testChannel';
-    const message = 'testMessage';
-    const slackMessageObject = formatSlackMessage(channel, message);
+  it('Should create mentions array, Teams', () => {
+    const mentions = getTeamsMentions(mockGithub2provider, mockPr2User);
+    assert.deepEqual(mentions, mockTeamsMentions);
+  });
 
-    assert.deepEqual(slackMessageObject, {
-      channel: 'testChannel',
+  it('Should format a Slack message to send the request', () => {
+    const channel = '#developers';
+    const message = 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1';
+    const slackMessageRequest = formatSlackMessage(channel, message);
+    const expectedSlackMessageRequest = {
+      channel: '#developers',
       username: 'Pull Request reviews reminder',
-      text: 'testMessage',
-    });
+      text: 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1',
+    };
+    assert.deepEqual(slackMessageRequest, expectedSlackMessageRequest);
   });
 
-  it('Should send a properly structured MS Teams message', () => {
-    const message = 'testMessage';
-    const mentionObjects = [{ test: 'data' }];
-    const msTeamsMessageObject = formatMsTeamsMessage(message, mentionObjects);
-
-    assert.deepEqual(msTeamsMessageObject, {
-      type: `message`,
-      attachments: [
-        {
-          contentType: `application/vnd.microsoft.card.adaptive`,
-          content: {
-            type: `AdaptiveCard`,
-            body: [
-              {
-                type: `TextBlock`,
-                text: 'testMessage',
-                wrap: true,
-              },
-            ],
-            $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
-            version: `1.0`,
-            msteams: {
-              width: 'Full',
-              entities: [{ test: 'data' }],
-            },
-          },
-        },
-      ],
-    });
+  it('Should format a Teams message to send the request', () => {
+    const message = `Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)`;
+    const teamsMessageRequest = formatTeamsMessage(message, mockTeamsMentions);
+    assert.deepEqual(teamsMessageRequest, mockTeamsMessageRequest);
   });
 });

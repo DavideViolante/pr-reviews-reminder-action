@@ -8,9 +8,9 @@ const {
   createPr2UserArray,
   prettyMessage,
   stringToObject,
-  getMsTeamsMentions,
+  getTeamsMentions,
   formatSlackMessage,
-  formatMsTeamsMessage,
+  formatTeamsMessage,
 } = require('./functions');
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_API_URL } = process.env;
@@ -71,8 +71,8 @@ async function main() {
           messageObject = formatSlackMessage(channel, messageText);
           break;
         case 'msteams': {
-          const msTeamsMentions = getMsTeamsMentions(github2provider, pr2user);
-          messageObject = formatMsTeamsMessage(messageText, msTeamsMentions);
+          const msTeamsMentions = getTeamsMentions(github2provider, pr2user);
+          messageObject = formatTeamsMessage(messageText, msTeamsMentions);
           break;
         }
       }
