@@ -4,6 +4,7 @@ const assert = require('assert');
 const {
   getPullRequestsToReview,
   getPullRequestsWithoutLabel,
+  getPullRequestsReviewersCount,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
@@ -209,6 +210,11 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     delete mockPullRequests[1].labels;
     delete mockPullRequests[2].labels;
     delete mockPullRequests[3].labels;
+  });
+
+  it('Should count the total number of reviewers in the pull requests', () => {
+    const total = getPullRequestsReviewersCount(mockPullRequests);
+    assert.strictEqual(total, 4);
   });
 
   it('Should create the array with pr and users (some reviewers)', () => {

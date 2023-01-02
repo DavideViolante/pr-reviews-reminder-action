@@ -5,6 +5,7 @@ const axios = require('axios');
 const {
   getPullRequestsToReview,
   getPullRequestsWithoutLabel,
+  getPullRequestsReviewersCount,
   createPr2UserArray,
   prettyMessage,
   stringToObject,
@@ -57,7 +58,8 @@ async function main() {
     const ignoreLabel = core.getInput('ignore-label');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
-    core.info(`There are ${pullRequests.data.length} open pull requests`);
+    const totalReviewers = await getPullRequestsReviewersCount();
+    core.info(`There are ${pullRequests.data.length} open pull requests and ${totalReviewers} reviewers`);
     const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
     const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequestsToReview, ignoreLabel);
     core.info(`There are ${pullRequestsWithoutLabel.length} pull requests waiting for reviews`);

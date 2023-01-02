@@ -20,6 +20,15 @@ function getPullRequestsWithoutLabel(pullRequests, ignoreLabel) {
 }
 
 /**
+ * Count Pull Requests reviewers
+ * @param {Array} pullRequests Pull Requests
+ * @return {Number} Reviewers number
+ */
+function getPullRequestsReviewersCount(pullRequests) {
+  return pullRequests.reduce((total, pullRequest) => (total + pullRequest.requested_reviewers.length), 0);
+}
+
+/**
  * Create an Array of Objects with { url, title, login } properties from a list of Pull Requests
  * @param {Array} pullRequestsToReview Pull Requests
  * @return {Array} Array of Objects with { url, title, login } properties
@@ -169,6 +178,7 @@ function formatTeamsMessage(message, mentionsArray) {
 module.exports = {
   getPullRequestsToReview,
   getPullRequestsWithoutLabel,
+  getPullRequestsReviewersCount,
   createPr2UserArray,
   stringToObject,
   prettyMessage,
