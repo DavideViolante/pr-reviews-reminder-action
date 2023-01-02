@@ -58,7 +58,7 @@ async function main() {
     const ignoreLabel = core.getInput('ignore-label');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
-    const totalReviewers = await getPullRequestsReviewersCount();
+    const totalReviewers = await getPullRequestsReviewersCount(pullRequests.data);
     core.info(`There are ${pullRequests.data.length} open pull requests and ${totalReviewers} reviewers`);
     const pullRequestsToReview = getPullRequestsToReview(pullRequests.data);
     const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequestsToReview, ignoreLabel);
