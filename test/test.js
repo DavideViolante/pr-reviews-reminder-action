@@ -258,6 +258,10 @@ describe('Pull Request Reviews Reminder Action tests', () => {
       name3:ID3,  name4:ID4,
     name5:Id5`));
     assert.ok(checkGithubProviderFormat('name1:ID123, name2:ID456'));
+    assert.ok(checkGithubProviderFormat('name1:asd@example.com,name2:qwe@example.it'));
+    assert.ok(checkGithubProviderFormat('DavideViolante:admin@DavideViolante.onmicrosoft.com, name2:qwe@example.it'));
+    assert.ok(checkGithubProviderFormat(`name1:asd@example.com,
+    name2:qwe@example.it`));
     assert.ok(!checkGithubProviderFormat('name1ID123,name2:ID456'));
     assert.ok(!checkGithubProviderFormat('name1:ID123name2:ID456'));
     assert.ok(!checkGithubProviderFormat('name1ID123,name2ID456'));

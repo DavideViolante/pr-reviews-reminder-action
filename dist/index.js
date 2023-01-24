@@ -67,7 +67,8 @@ function createPr2UserArray(pullRequestsToReview) {
  */
 function checkGithubProviderFormat(str) {
   // Pattern made with the help of ChatGPT
-  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+(,\s*[A-z0-9_-]+:[A-z0-9_-]+)*$/m;
+  const az09 = '[A-z0-9_\\-@\\.]+';
+  const pattern = new RegExp(`^${az09}:${az09}(,\\s*${az09}:${az09})*$`, 'm');
   return pattern.test(str);
 }
 
