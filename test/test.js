@@ -113,6 +113,9 @@ const mockPr2User = [
 ];
 const mockStringToConvert = 'name1:ID1,name2:ID2,name3:ID3';
 const mockStringToConvertOneUser = 'name1:ID1';
+const mockStringToConvertMultiline = `name1:ID1,
+  name2:ID2,  
+  name3:ID3, name4:ID4`;
 const mockStringToConvertMalformed = 'foo;bar';
 const mockStringToConvertNoData = '';
 const mockGithub2provider = {
@@ -250,7 +253,11 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.ok(checkGithubProviderFormat('name1:ID123,name2:ID456'));
     assert.ok(!checkGithubProviderFormat(''));
     assert.ok(checkGithubProviderFormat('name1:ID123'));
-    assert.ok(!checkGithubProviderFormat('name1:ID123, name2:ID456'));
+    assert.ok(checkGithubProviderFormat(`name1:ID123,
+    name2:ID456,
+      name3:ID3,  name4:ID4,
+    name5:Id5`));
+    assert.ok(checkGithubProviderFormat('name1:ID123, name2:ID456'));
     assert.ok(!checkGithubProviderFormat('name1ID123,name2:ID456'));
     assert.ok(!checkGithubProviderFormat('name1:ID123name2:ID456'));
     assert.ok(!checkGithubProviderFormat('name1ID123,name2ID456'));
@@ -268,6 +275,15 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     const obj = stringToObject(mockStringToConvertOneUser);
     assert.strictEqual(typeof obj, 'object');
     assert.strictEqual(obj.name1, 'ID1');
+  });
+
+  it('Should create an object from a string (multiline)', () => {
+    const obj = stringToObject(mockStringToConvertMultiline);
+    assert.strictEqual(typeof obj, 'object');
+    assert.strictEqual(obj.name1, 'ID1');
+    assert.strictEqual(obj.name2, 'ID2');
+    assert.strictEqual(obj.name3, 'ID3');
+    assert.strictEqual(obj.name4, 'ID4');
   });
 
   it('Should create an object from a string (malformed)', () => {

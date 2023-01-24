@@ -61,7 +61,7 @@ function createPr2UserArray(pullRequestsToReview) {
  */
 function checkGithubProviderFormat(str) {
   // Pattern made with the help of ChatGPT
-  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+((,[A-z0-9_-]+:[A-z0-9_-]+)*)$/;
+  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+(,\s*[A-z0-9_-]+:[A-z0-9_-]+)*$/m;
   return pattern.test(str);
 }
 
@@ -75,7 +75,7 @@ function stringToObject(str) {
   if (!str) {
     return map;
   }
-  const users = str.split(',');
+  const users = str.replace(/[\s\r\n]+/g, '').split(',');
   users.forEach((user) => {
     const [github, provider] = user.split(':');
     map[github] = provider;
