@@ -67,7 +67,7 @@ function createPr2UserArray(pullRequestsToReview) {
  */
 function checkGithubProviderFormat(str) {
   // Pattern made with the help of ChatGPT
-  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+((,[A-z0-9_-]+:[A-z0-9_-]+)*)$/;
+  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+(,\s*[A-z0-9_-]+:[A-z0-9_-]+)*$/m;
   return pattern.test(str);
 }
 
@@ -81,7 +81,7 @@ function stringToObject(str) {
   if (!str) {
     return map;
   }
-  const users = str.split(',');
+  const users = str.replace(/[\s\r\n]+/g, '').split(',');
   users.forEach((user) => {
     const [github, provider] = user.split(':');
     map[github] = provider;
@@ -6463,7 +6463,7 @@ module.exports = require("zlib");
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-// Axios v1.2.2 Copyright (c) 2022 Matt Zabriskie and contributors
+// Axios v1.2.3 Copyright (c) 2023 Matt Zabriskie and contributors
 
 
 const FormData$1 = __nccwpck_require__(4334);
@@ -8376,7 +8376,7 @@ function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 }
 
-const VERSION = "1.2.2";
+const VERSION = "1.2.3";
 
 function parseProtocol(url) {
   const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
