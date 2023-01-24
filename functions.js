@@ -55,6 +55,17 @@ function createPr2UserArray(pullRequestsToReview) {
 }
 
 /**
+ * Check if the github-provider-map string is in correct format
+ * @param {String} str String to be checked to be in correct format
+ * @return {Boolean} String validity as boolean
+ */
+function checkGithubProviderFormat(str) {
+  // Pattern made with the help of ChatGPT
+  const pattern = /^[A-z0-9_-]+:[A-z0-9_-]+((,[A-z0-9_-]+:[A-z0-9_-]+)*)$/;
+  return pattern.test(str);
+}
+
+/**
  * Convert a string like "name1:ID123,name2:ID456" to an Object { name1: "ID123", name2: "ID456"}
  * @param {String} str String to convert to Object
  * @return {Object} Object with usernames as properties and IDs as values
@@ -180,6 +191,7 @@ module.exports = {
   getPullRequestsWithoutLabel,
   getPullRequestsReviewersCount,
   createPr2UserArray,
+  checkGithubProviderFormat,
   stringToObject,
   prettyMessage,
   getTeamsMentions,

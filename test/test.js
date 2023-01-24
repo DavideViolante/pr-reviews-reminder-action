@@ -6,6 +6,7 @@ const {
   getPullRequestsWithoutLabel,
   getPullRequestsReviewersCount,
   createPr2UserArray,
+  checkGithubProviderFormat,
   stringToObject,
   prettyMessage,
   getTeamsMentions,
@@ -242,6 +243,17 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should create the array with pr and users (no PRs)', () => {
     const array = createPr2UserArray(mockPullRequestsNoData);
     assert.strictEqual(array.length, 0);
+  });
+
+  it('Should check the validity of the github-provider-map string', () => {
+    // Asserts made with the help of ChatGPT
+    assert.ok(checkGithubProviderFormat('name1:ID123,name2:ID456'));
+    assert.ok(!checkGithubProviderFormat(''));
+    assert.ok(checkGithubProviderFormat('name1:ID123'));
+    assert.ok(!checkGithubProviderFormat('name1:ID123, name2:ID456'));
+    assert.ok(!checkGithubProviderFormat('name1ID123,name2:ID456'));
+    assert.ok(!checkGithubProviderFormat('name1:ID123name2:ID456'));
+    assert.ok(!checkGithubProviderFormat('name1ID123,name2ID456'));
   });
 
   it('Should create an object from a string', () => {
