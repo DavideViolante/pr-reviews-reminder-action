@@ -30,7 +30,7 @@ Another hacky way (no code) to find the MS Teams UPN is the following: open MS T
 
 ### ignore-label
 
-Ignore Pull Requests with that label, eg: `no-reminder` (optional).
+Ignore Pull Requests with that label(s), eg: `no-reminder` or `no-reminder,ignore me` (optional).
 
 ## Example usage
 
@@ -46,7 +46,7 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v2.3.2
+    - uses: davideviolante/pr-reviews-reminder-action@v2.4.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -54,7 +54,7 @@ jobs:
         provider: '' # Required (slack or msteams)
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
-        ignore-label: '' # Optional, eg: no-reminder
+        ignore-label: '' # Optional, eg: no-reminder,ignore me
 ```
 
 ## Bug or feedback?

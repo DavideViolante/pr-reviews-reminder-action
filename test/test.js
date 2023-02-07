@@ -216,6 +216,19 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     delete mockPullRequests[3].labels;
   });
 
+  it('Should get pull requests with requested reviewers and skip those with ignore label (array)', () => {
+    mockPullRequests[1].labels = [{ name: 'ignore me' }, { name: 'test' }];
+    mockPullRequests[2].labels = [{ name: 'ignore2' }];
+    mockPullRequests[3].labels = [{ name: 'test' }, { name: 'ignore3' }];
+    const pullRequests = getPullRequestsToReview(mockPullRequests);
+    assert.strictEqual(pullRequests.length, 4);
+    const pullRequestsWithoutLabel = getPullRequestsWithoutLabel(pullRequests, 'ignore1, ignore me ,ignore2 , ignore3,ignore');
+    assert.strictEqual(pullRequestsWithoutLabel.length, 2);
+    delete mockPullRequests[1].labels;
+    delete mockPullRequests[2].labels;
+    delete mockPullRequests[3].labels;
+  });
+
   it('Should count the total number of reviewers in the pull requests', () => {
     const total = getPullRequestsReviewersCount(mockPullRequests);
     assert.strictEqual(total, 4);

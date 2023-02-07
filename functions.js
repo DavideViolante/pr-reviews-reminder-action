@@ -10,13 +10,13 @@ function getPullRequestsToReview(pullRequests) {
 /**
  * Filter Pull Requests without a specific label
  * @param {Array} pullRequests Pull Requests to filter
- * @param {String} ignoreLabel Pull Request label to ignore
+ * @param {String} ignoreLabels Pull Request label(s) to ignore
  * @return {Array} Pull Requests without a specific label
  */
-function getPullRequestsWithoutLabel(pullRequests, ignoreLabel) {
-  return pullRequests.filter((pr) =>
-    !((pr.labels || []).some((label) => label.name === ignoreLabel)),
-  );
+function getPullRequestsWithoutLabel(pullRequests, ignoreLabels) {
+  const ignoreLabelsArray = ignoreLabels.replace(/\s*,\s*/g, ',').split(','); // ['ignore1', 'ignore2', ...]
+  const ignoreLabelsSet = new Set(ignoreLabelsArray);
+  return pullRequests.filter((pr) => !((pr.labels || []).some((label) => ignoreLabelsSet.has(label.name))));
 }
 
 /**
