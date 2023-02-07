@@ -66,7 +66,7 @@ async function main() {
     core.info(`There are ${pullRequestsWithoutLabel.length} pull requests waiting for reviews`);
     if (pullRequestsWithoutLabel.length) {
       const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
-      if (!checkGithubProviderFormat(github2providerString)) {
+      if (github2providerString && !checkGithubProviderFormat(github2providerString)) {
         core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
       }
       const github2provider = stringToObject(github2providerString);
