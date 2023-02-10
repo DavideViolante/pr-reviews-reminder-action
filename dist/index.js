@@ -129,15 +129,18 @@ function prettyMessage(pr2user, github2provider, provider) {
  */
 function getTeamsMentions(github2provider, pr2user) {
   const mentions = [];
-  for (const user of pr2user) {
-    mentions.push({
-      type: `mention`,
-      text: `<at>${user.login}</at>`,
-      mentioned: {
-        id: github2provider[user.login],
-        name: user.login,
-      },
-    });
+  // Add mentions array only if the map is provided, or no notification is sent
+  if (Object.keys(github2provider).length > 0) {
+    for (const user of pr2user) {
+      mentions.push({
+        type: `mention`,
+        text: `<at>${user.login}</at>`,
+        mentioned: {
+          id: github2provider[user.login],
+          name: user.login,
+        },
+      });
+    }
   }
   return mentions;
 }
@@ -161,10 +164,10 @@ function formatSlackMessage(channel, message) {
  * Format the MS Teams message request object
  * Docs: https://bit.ly/3UlOoqo
  * @param {String} message formatted message string
- * @param {Array} mentionsArray teams mention objects
+ * @param {Array} [mentionsArray] teams mention objects array
  * @return {Object} Ms Teams message data object
  */
-function formatTeamsMessage(message, mentionsArray) {
+function formatTeamsMessage(message, mentionsArray = []) {
   const messageData = {
     type: `message`,
     attachments: [
@@ -10756,7 +10759,7 @@ async function main() {
     if (pullRequestsWithoutLabel.length) {
       const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
       if (github2providerString && !checkGithubProviderFormat(github2providerString)) {
-        core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
+        return core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
       }
       const github2provider = stringToObject(github2providerString);
       const messageText = prettyMessage(pr2user, github2provider, provider);

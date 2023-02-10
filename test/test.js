@@ -187,6 +187,31 @@ const mockTeamsMessageRequest = {
   ],
 };
 
+const mockTeamsMessageRequestNoMentions = {
+  type: `message`,
+  attachments: [
+    {
+      contentType: `application/vnd.microsoft.card.adaptive`,
+      content: {
+        type: `AdaptiveCard`,
+        body: [
+          {
+            type: `TextBlock`,
+            text: 'Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)',
+            wrap: true,
+          },
+        ],
+        $schema: `http://adaptivecards.io/schemas/adaptive-card.json`,
+        version: `1.0`,
+        msteams: {
+          width: 'Full',
+          entities: [],
+        },
+      },
+    },
+  ],
+};
+
 describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should get pull requests with requested reviewers (some reviewers)', () => {
     const pullRequests = getPullRequestsToReview(mockPullRequests);
@@ -372,6 +397,11 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.deepEqual(mentions, mockTeamsMentions);
   });
 
+  it('Should create empty mentions array, Teams', () => {
+    const mentions = getTeamsMentions({}, mockPr2User);
+    assert.deepEqual(mentions, []);
+  });
+
   it('Should format a Slack message to send the request', () => {
     const channel = '#developers';
     const message = 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1';
@@ -388,5 +418,11 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     const message = `Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)`;
     const teamsMessageRequest = formatTeamsMessage(message, mockTeamsMentions);
     assert.deepEqual(teamsMessageRequest, mockTeamsMessageRequest);
+  });
+
+  it('Should format a Teams message to send the request (no mentions array)', () => {
+    const message = `Hey @User1, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)`;
+    const teamsMessageRequest = formatTeamsMessage(message);
+    assert.deepEqual(teamsMessageRequest, mockTeamsMessageRequestNoMentions);
   });
 });

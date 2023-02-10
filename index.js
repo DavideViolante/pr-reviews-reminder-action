@@ -67,7 +67,7 @@ async function main() {
     if (pullRequestsWithoutLabel.length) {
       const pr2user = createPr2UserArray(pullRequestsWithoutLabel);
       if (github2providerString && !checkGithubProviderFormat(github2providerString)) {
-        core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
+        return core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
       }
       const github2provider = stringToObject(github2providerString);
       const messageText = prettyMessage(pr2user, github2provider, provider);
