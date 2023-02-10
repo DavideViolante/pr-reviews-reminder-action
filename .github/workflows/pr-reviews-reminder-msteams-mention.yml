@@ -1,4 +1,4 @@
-name: PRs reviews reminder (self testing for MS Teams)
+name: PRs reviews reminder (self testing for MS Teams with mention)
 
 on: ["push", "pull_request"]
 
