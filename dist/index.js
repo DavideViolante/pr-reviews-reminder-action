@@ -20,7 +20,7 @@ function getPullRequestsToReview(pullRequests) {
  * @return {Array} Pull Requests without a specific label
  */
 function getPullRequestsWithoutLabel(pullRequests, ignoreLabels) {
-  const ignoreLabelsArray = ignoreLabels.replace(/\s+/g, '').split(','); // ['ignore1', 'ignore2', ...]
+  const ignoreLabelsArray = ignoreLabels.replace(/\s*,\s*/g, ',').split(','); // ['ignore1', 'ignore2', ...]
   const ignoreLabelsSet = new Set(ignoreLabelsArray);
   return pullRequests.filter((pr) => !((pr.labels || []).some((label) => ignoreLabelsSet.has(label.name))));
 }
