@@ -111,6 +111,28 @@ const mockPr2User = [
     login: 'User2',
   },
 ];
+const mockPr2UserWrongId = [
+  {
+    url: 'https://example.com/1',
+    title: 'Title1',
+    login: 'User1',
+  },
+  {
+    url: 'https://example.com/1',
+    title: 'Title1',
+    login: 'User22',
+  },
+  {
+    url: 'https://example.com/3',
+    title: 'Title3',
+    login: 'User3',
+  },
+  {
+    url: 'https://example.com/5',
+    title: 'Title5',
+    login: 'User22',
+  },
+];
 const mockStringToConvert = 'name1:ID1,name2:ID2,name3:ID3';
 const mockStringToConvertOneUser = 'name1:ID1';
 const mockStringToConvertMultiline = `name1:ID1,
@@ -159,6 +181,24 @@ const mockTeamsMentions = [
     mentioned: {
       id: 'ID456',
       name: 'User2',
+    },
+  },
+];
+const mockTeamsMentionsWrongIds = [
+  {
+    type: `mention`,
+    text: `<at>User1</at>`,
+    mentioned: {
+      id: 'ID123',
+      name: 'User1',
+    },
+  },
+  {
+    type: `mention`,
+    text: `<at>User3</at>`,
+    mentioned: {
+      id: 'ID789',
+      name: 'User3',
     },
   },
 ];
@@ -374,6 +414,15 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(dRow, 'Hey <at>User2</at>, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
   });
 
+  it('Should print the pretty message, one reviewer per row, Teams (correct map, wrong ids)', () => {
+    const message = prettyMessage(mockPr2UserWrongId, mockGithub2provider, 'msteams');
+    const [aRow, bRow, cRow, dRow] = message.split('  \n');
+    assert.strictEqual(aRow, 'Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(bRow, 'Hey @User22, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(cRow, 'Hey <at>User3</at>, the PR "Title3" is waiting for your review: [https://example.com/3](https://example.com/3)');
+    assert.strictEqual(dRow, 'Hey @User22, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
+  });
+
   it('Should print the pretty message, one reviewer per row, Teams (malformed map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, 'msteams');
     const [aRow, bRow, cRow, dRow] = message.split('  \n');
@@ -395,6 +444,11 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   it('Should create mentions array, Teams', () => {
     const mentions = getTeamsMentions(mockGithub2provider, mockPr2User);
     assert.deepEqual(mentions, mockTeamsMentions);
+  });
+
+  it('Should create mentions array, wrong IDs, Teams', () => {
+    const mentions = getTeamsMentions(mockGithub2provider, mockPr2UserWrongId);
+    assert.deepEqual(mentions, mockTeamsMentionsWrongIds);
   });
 
   it('Should create empty mentions array, Teams', () => {

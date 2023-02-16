@@ -82,8 +82,16 @@ async function main() {
           break;
         }
       }
-      await sendNotification(webhookUrl, messageObject);
+      const resNotification = await sendNotification(webhookUrl, messageObject);
+      // https://github.com/MicrosoftDocs/msteams-docs/issues/402
+      // If MS Teams fails, it might return still 200 OK, but data is not 1:
+      if (provider === 'msteams' && resNotification.data !== 1) {
+        core.info('Error: MS Teams notification failed.');
+        core.info(`Debugging: request body sent:\n${resNotification.config?.data}`);
+        return core.setFailed(resNotification.data);
+      }
       core.info(`Notification sent successfully!`);
+      core.info(`Debugging: request body sent:\n${resNotification.config?.data}`);
     }
   } catch (error) {
     core.setFailed(error.message);
