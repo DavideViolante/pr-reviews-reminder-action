@@ -126,14 +126,17 @@ function getTeamsMentions(github2provider, pr2user) {
   // Add mentions array only if the map is provided, or no notification is sent
   if (Object.keys(github2provider).length > 0) {
     for (const user of pr2user) {
-      mentions.push({
-        type: `mention`,
-        text: `<at>${user.login}</at>`,
-        mentioned: {
-          id: github2provider[user.login],
-          name: user.login,
-        },
-      });
+      // mentioed property needs id and name, or no notification is sent
+      if (github2provider[user.login]) {
+        mentions.push({
+          type: `mention`,
+          text: `<at>${user.login}</at>`,
+          mentioned: {
+            id: github2provider[user.login],
+            name: user.login,
+          },
+        });
+      }
     }
   }
   return mentions;

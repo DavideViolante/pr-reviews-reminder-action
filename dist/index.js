@@ -132,14 +132,17 @@ function getTeamsMentions(github2provider, pr2user) {
   // Add mentions array only if the map is provided, or no notification is sent
   if (Object.keys(github2provider).length > 0) {
     for (const user of pr2user) {
-      mentions.push({
-        type: `mention`,
-        text: `<at>${user.login}</at>`,
-        mentioned: {
-          id: github2provider[user.login],
-          name: user.login,
-        },
-      });
+      // mentioed property needs id and name, or no notification is sent
+      if (github2provider[user.login]) {
+        mentions.push({
+          type: `mention`,
+          text: `<at>${user.login}</at>`,
+          mentioned: {
+            id: github2provider[user.login],
+            name: user.login,
+          },
+        });
+      }
     }
   }
   return mentions;
@@ -10774,8 +10777,16 @@ async function main() {
           break;
         }
       }
-      await sendNotification(webhookUrl, messageObject);
+      const resNotification = await sendNotification(webhookUrl, messageObject);
+      // https://github.com/MicrosoftDocs/msteams-docs/issues/402
+      // If MS Teams fails, it might return still 200 OK, but data is not 1:
+      if (provider === 'msteams' && resNotification.data !== 1) {
+        core.info('Error: MS Teams notification failed.');
+        core.info(`Debugging: request body sent:\n${resNotification.config?.data}`);
+        return core.setFailed(resNotification.data);
+      }
       core.info(`Notification sent successfully!`);
+      core.info(`Debugging: request body sent:\n${resNotification.config?.data}`);
     }
   } catch (error) {
     core.setFailed(error.message);
