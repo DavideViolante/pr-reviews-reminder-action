@@ -76,6 +76,9 @@ async function main() {
         case 'slack':
           messageObject = formatSlackMessage(channel, messageText);
           break;
+        case 'rocket':
+          messageObject = formatRocketMessage(channel, messageText);
+          break;
         case 'msteams': {
           const msTeamsMentions = getTeamsMentions(github2provider, pr2user);
           messageObject = formatTeamsMessage(messageText, msTeamsMentions);

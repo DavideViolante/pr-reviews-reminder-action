@@ -102,6 +102,13 @@ function prettyMessage(pr2user, github2provider, provider) {
         message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
         break;
       }
+      case 'rocket': {
+              const mention = github2provider[obj.login] ?
+                `<@${github2provider[obj.login]}>` :
+                `@${obj.login}`;
+              message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
+              break;
+            }
       case 'msteams': {
         const mention = github2provider[obj.login] ?
           `<at>${obj.login}</at>` :
@@ -158,6 +165,21 @@ function formatSlackMessage(channel, message) {
 }
 
 /**
+ * Formats channel and rocket message text into a request object
+ * @param {String} channel channel to send the message to
+ * @param {String} message rocket message text
+ * @return {Object} rocket message data object
+ */
+function formatRocketMessage(channel, message) {
+  const messageData = {
+    channel: channel,
+    username: 'Pull Request reviews reminder',
+    text: message,
+  };
+  return messageData;
+}
+
+/**
  * Format the MS Teams message request object
  * Docs: https://bit.ly/3UlOoqo
  * @param {String} message formatted message string
@@ -203,5 +225,6 @@ module.exports = {
   prettyMessage,
   getTeamsMentions,
   formatTeamsMessage,
+  formatRocketMessage,
   formatSlackMessage,
 };
