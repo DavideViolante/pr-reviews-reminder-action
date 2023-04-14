@@ -12,6 +12,7 @@ const {
   stringToObject,
   getTeamsMentions,
   formatSlackMessage,
+  formatRocketMessage,
   formatTeamsMessage,
 } = require('./functions');
 

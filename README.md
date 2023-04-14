@@ -1,7 +1,7 @@
 # Pull Request reviews reminder action
 [![](https://github.com/davideviolante/pr-reviews-reminder-action/workflows/Node.js%20CI/badge.svg)](https://github.com/DavideViolante/pr-reviews-reminder-action/actions?query=workflow%3A%22Node.js+CI%22) [![Coverage Status](https://coveralls.io/repos/github/DavideViolante/pr-reviews-reminder-action/badge.svg?branch=master)](https://coveralls.io/github/DavideViolante/pr-reviews-reminder-action?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/60f9b3a6b4177a0bfe77/maintainability)](https://codeclimate.com/github/DavideViolante/pr-reviews-reminder-action/maintainability) [![Donate](https://img.shields.io/badge/paypal-donate-179BD7.svg)](https://www.paypal.me/dviolante)
 
-Action to send Slack/Teams notifications when there are pull requests pending for reviews.
+Action to send Slack/Rocket/Teams notifications when there are pull requests pending for reviews.
 
 ## Preview
 ![Preview](https://raw.githubusercontent.com/DavideViolante/pr-reviews-reminder-action/master/preview.png "Preview")
@@ -14,7 +14,7 @@ The webhook URL (required). More info [here (Slack)](https://api.slack.com/messa
 
 ### provider
 
-Chat provider, `slack` or `msteams` (required). Default `slack`.
+Chat provider, `slack`, `Rocket` or `msteams` (required). Default `slack`.
 
 ### channel
 
@@ -51,7 +51,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         webhook-url: '' # Required
-        provider: '' # Required (slack or msteams)
+        provider: '' # Required (slack, rocket or msteams)
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
         ignore-label: '' # Optional, eg: no-reminder,ignore me
