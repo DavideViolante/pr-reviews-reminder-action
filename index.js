@@ -12,6 +12,7 @@ const {
   stringToObject,
   getTeamsMentions,
   formatSlackMessage,
+  formatRocketMessage,
   formatTeamsMessage,
 } = require('./functions');
 
@@ -75,6 +76,9 @@ async function main() {
       switch (provider) {
         case 'slack':
           messageObject = formatSlackMessage(channel, messageText);
+          break;
+        case 'rocket':
+          messageObject = formatRocketMessage(channel, messageText);
           break;
         case 'msteams': {
           const msTeamsMentions = getTeamsMentions(github2provider, pr2user);
