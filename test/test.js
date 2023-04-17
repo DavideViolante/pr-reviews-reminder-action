@@ -407,31 +407,31 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   });
 
   it('Should print the pretty message, one reviewer per row, Rocket (correct map)', () => {
-      const message = prettyMessage(mockPr2User, mockGithub2provider, 'rocket');
-      const [aRow, bRow, cRow, dRow] = message.split('\n');
-      assert.strictEqual(aRow, 'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(bRow, 'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(cRow, 'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3');
-      assert.strictEqual(dRow, 'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5');
-    });
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'rocket');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5');
+  });
 
-    it('Should print the pretty message, one reviewer per row, Rocket (malformed map)', () => {
-      const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, 'rocket');
-      const [aRow, bRow, cRow, dRow] = message.split('\n');
-      assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
-      assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
-    });
+  it('Should print the pretty message, one reviewer per row, Rocket (malformed map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerMalformed, 'rocket');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
+  });
 
-    it('Should print the pretty message, one reviewer per row, Rocket (no map)', () => {
-      const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'rocket');
-      const [aRow, bRow, cRow, dRow] = message.split('\n');
-      assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
-      assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
-      assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
-    });
+  it('Should print the pretty message, one reviewer per row, Rocket (no map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'rocket');
+    const [aRow, bRow, cRow, dRow] = message.split('\n');
+    assert.strictEqual(aRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(bRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, 'Hey @User3, the PR "Title3" is waiting for your review: https://example.com/3');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
+  });
 
   it('Should print the pretty message, one reviewer per row, Teams (correct map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2provider, 'msteams');
@@ -497,16 +497,16 @@ describe('Pull Request Reviews Reminder Action tests', () => {
   });
 
   it('Should format a Rocket message to send the request', () => {
-      const channel = '#developers';
-      const message = 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1';
-      const rocketMessageRequest = formatRocketMessage(channel, message);
-      const expectedRocketMessageRequest = {
-        channel: '#developers',
-        username: 'Pull Request reviews reminder',
-        text: 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1',
-      };
-      assert.deepEqual(rocketMessageRequest, expectedRocketMessageRequest);
-    });
+    const channel = '#developers';
+    const message = 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1';
+    const rocketMessageRequest = formatRocketMessage(channel, message);
+    const expectedRocketMessageRequest = {
+      channel: '#developers',
+      username: 'Pull Request reviews reminder',
+      text: 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1',
+    };
+    assert.deepEqual(rocketMessageRequest, expectedRocketMessageRequest);
+  });
 
   it('Should format a Teams message to send the request', () => {
     const message = `Hey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)`;

@@ -103,12 +103,12 @@ function prettyMessage(pr2user, github2provider, provider) {
         break;
       }
       case 'rocket': {
-              const mention = github2provider[obj.login] ?
+        const mention = github2provider[obj.login] ?
                 `<@${github2provider[obj.login]}>` :
                 `@${obj.login}`;
-              message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
-              break;
-            }
+        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
+        break;
+      }
       case 'msteams': {
         const mention = github2provider[obj.login] ?
           `<at>${obj.login}</at>` :
