@@ -23,6 +23,10 @@ inputs:
     description: 'Ignore Pull Requests with that label'
     required: false
     default: ''
+  message-template:
+    description: 'Message template to render'
+    required: false
+    default: 'Hey {mention}, the PR "{title}" is waiting for your review: {url}'
 runs:
   using: 'node16'
   main: 'dist/index.js'

@@ -32,6 +32,11 @@ Another hacky way (no code) to find the MS Teams UPN is the following: open MS T
 
 Ignore Pull Requests with that label(s), eg: `no-reminder` or `no-reminder,ignore me` (optional).
 
+### message-template
+
+The message template to render (optional). Default: `Hey {mention}, the PR "{title}" is waiting for your review: {url}`.
+
+
 ## Example usage
 
 ```yaml
@@ -55,6 +60,7 @@ jobs:
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
         ignore-label: '' # Optional, eg: no-reminder,ignore me
+        message-template: '' # Optional, eg: Hey {mention}, the PR "{title}" is waiting for your review: {url}'
 ```
 
 ## Bug or feedback?
