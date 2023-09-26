@@ -89,13 +89,13 @@ function stringToObject(str) {
  * @param {String} mention Username to mention as the reviewer
  * @param {String} title PR title
  * @param {String} url PR URL
- * @param {String} messageTempalte Message template to render
+ * @param {String} messageTemplate Message template to render
  */
-function formatMessage(mention, title, url, messageTempalte) {
-  let message = messageTempalte.replace('{mention}', mention);
-  message = message.replace('{title}', title);
-  message = message.replace('{url}', url);
-  return message;
+function formatMessage(mention, title, url, messageTemplate) {
+  return messageTemplate
+    .replace('{mention}', mention)
+    .replace('{title}', title)
+    .replace('{url}', url);
 }
 
 /**
@@ -106,7 +106,7 @@ function formatMessage(mention, title, url, messageTempalte) {
  * @return {String} Pretty message to print
  */
 function prettyMessage(pr2user, github2provider, provider, messageTemplate) {
-  if (messageTemplate === null || messageTemplate === undefined) {
+  if (!messageTemplate) {
     messageTemplate = 'Hey {mention}, the PR "{title}" is waiting for your review: {url}';
   }
 
