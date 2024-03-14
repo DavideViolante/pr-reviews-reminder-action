@@ -58,6 +58,7 @@ async function main() {
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
     const ignoreLabel = core.getInput('ignore-label');
+    const messageTemplate = core.getInput('message-template');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     const totalReviewers = await getPullRequestsReviewersCount(pullRequests.data);
@@ -71,7 +72,7 @@ async function main() {
         return core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
       }
       const github2provider = stringToObject(github2providerString);
-      const messageText = prettyMessage(pr2user, github2provider, provider);
+      const messageText = prettyMessage(pr2user, github2provider, provider, messageTemplate);
       let messageObject;
       switch (provider) {
         case 'slack':
