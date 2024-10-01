@@ -23,7 +23,7 @@
     "axios": "^1.7.7"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1",
+    "@vercel/ncc": "^0.38.2",
     "eslint": "^8.41.0",
     "eslint-config-google": "^0.14.0",
     "mocha": "^10.7.3",
