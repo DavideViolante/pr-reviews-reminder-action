@@ -85,13 +85,31 @@ function stringToObject(str) {
 }
 
 /**
+ * Format the message to print
+ * @param {String} mention Username to mention as the reviewer
+ * @param {String} title PR title
+ * @param {String} url PR URL
+ * @param {String} messageTemplate Message template to render
+ */
+function formatMessage(mention, title, url, messageTemplate) {
+  return messageTemplate
+    .replace('{mention}', mention)
+    .replace('{title}', title)
+    .replace('{url}', url);
+}
+
+/**
  * Create a pretty message to print
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
  * @param {Object} github2provider Object containing usernames as properties and IDs as values
  * @param {String} provider Service to use: slack or msteams
  * @return {String} Pretty message to print
  */
-function prettyMessage(pr2user, github2provider, provider) {
+function prettyMessage(pr2user, github2provider, provider, messageTemplate) {
+  if (!messageTemplate) {
+    messageTemplate = 'Hey {mention}, the PR "{title}" is waiting for your review: {url}';
+  }
+
   let message = '';
   for (const obj of pr2user) {
     switch (provider) {
@@ -99,21 +117,22 @@ function prettyMessage(pr2user, github2provider, provider) {
         const mention = github2provider[obj.login] ?
           `<@${github2provider[obj.login]}>` :
           `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
+        message += messageTemplate.for
+        message += formatMessage(mention, title, url, messageTemplate) + "\n";
         break;
       }
       case 'rocket': {
         const mention = github2provider[obj.login] ?
                 `<@${github2provider[obj.login]}>` :
                 `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
+        message += formatMessage(mention, title, url, messageTemplate) + "\n";
         break;
       }
       case 'msteams': {
         const mention = github2provider[obj.login] ?
           `<at>${obj.login}</at>` :
           `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
+        message += formatMessage(mention, title, url, messageTemplate) + "\n";
         break;
       }
     }
