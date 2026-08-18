@@ -94,9 +94,9 @@ function stringToObject(str) {
  */
 function formatMessage(mention, title, url, messageTemplate) {
   return messageTemplate
-      .replace('{mention}', mention)
-      .replace('{title}', title)
-      .replace('{url}', url);
+    .replaceAll('{mention}', mention)
+    .replaceAll('{title}', title)
+    .replaceAll('{url}', url);
 }
 
 /**
@@ -149,7 +149,7 @@ function prettyMessage(pr2user, github2provider, provider, messageTemplate, aggr
   }
 
   if (aggregatePerMention) {
-    const loginToPrs = {};
+    const loginToPrs = Object.create(null);
     for (const obj of pr2user) {
       if (!loginToPrs[obj.login]) {
         loginToPrs[obj.login] = [];

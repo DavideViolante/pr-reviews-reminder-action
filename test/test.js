@@ -471,13 +471,16 @@ describe('Pull Request Reviews Reminder Action tests', () => {
 
   it('Should print the pretty message, aggregated per mention, Slack (correct map)', () => {
     const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack', undefined, true);
-    const [aRow, bRow, cRow, dRow, eRow, fRow] = message.split('\n');
-    assert.strictEqual(aRow, '<@ID123> (1 pull requests):');
-    assert.strictEqual(bRow, 'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(cRow, '<@ID456> (2 pull requests):');
-    assert.strictEqual(dRow, 'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1');
-    assert.strictEqual(eRow, 'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5');
-    assert.strictEqual(fRow, '<@ID789> (1 pull requests):');
+    const rows = message.trimEnd().split('\n');
+    assert.deepStrictEqual(rows, [
+      '<@ID123> (1 pull requests):',
+      'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1',
+      '<@ID456> (2 pull requests):',
+      'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1',
+      'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5',
+      '<@ID789> (1 pull requests):',
+      'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3',
+    ]);
   });
 
   it('Should print the pretty message, aggregated per mention, Slack (no map)', () => {

@@ -65,8 +65,8 @@ jobs:
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
         ignore-label: '' # Optional, eg: no-reminder,ignore me
-        message-template: '' # Optional, eg: Hey {mention}, the PR "{title}" is waiting for your review: {url}'
-        aggregate-per-mention: '' # Optional, eg: true or false (default false)
+        message-template: '' # Optional, eg: Hey {mention}, the PR "{title}" is waiting for your review: {url}
+        aggregate-per-mention: false # Optional, eg: true or false (default false)
 ```
 
 ## Bug or feedback?
