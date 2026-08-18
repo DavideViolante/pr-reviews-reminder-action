@@ -508,6 +508,13 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.ok(aRow.includes('@User1'));
   });
 
+  it('Should print the pretty message with a custom message template', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack', 'Review needed: {url}');
+    const [aRow] = message.split('\n');
+    assert.ok(aRow.includes('Review needed:'));
+    assert.ok(aRow.includes('https://example.com/'));
+  });
+
   it('Should create mentions array, Teams', () => {
     const mentions = getTeamsMentions(mockGithub2provider, mockPr2User);
     assert.deepEqual(mentions, mockTeamsMentions);
