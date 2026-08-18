@@ -90,12 +90,13 @@ function stringToObject(str) {
  * @param {String} title PR title
  * @param {String} url PR URL
  * @param {String} messageTemplate Message template to render
+ * @return {String} Formatted message
  */
 function formatMessage(mention, title, url, messageTemplate) {
   return messageTemplate
-    .replace('{mention}', mention)
-    .replace('{title}', title)
-    .replace('{url}', url);
+      .replace('{mention}', mention)
+      .replace('{title}', title)
+      .replace('{url}', url);
 }
 
 /**
