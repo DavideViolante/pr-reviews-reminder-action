@@ -502,6 +502,12 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.ok(!message.includes('pull requests):'));
   });
 
+  it('Should print the pretty message, one reviewer per row, unknown provider', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'unknown');
+    const [aRow] = message.split('\n');
+    assert.ok(aRow.includes('@User1'));
+  });
+
   it('Should create mentions array, Teams', () => {
     const mentions = getTeamsMentions(mockGithub2provider, mockPr2User);
     assert.deepEqual(mentions, mockTeamsMentions);
