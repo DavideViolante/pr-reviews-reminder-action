@@ -91,38 +91,93 @@ function stringToObject(str) {
 }
 
 /**
+ * Format the message to print
+ * @param {String} mention Username to mention as the reviewer
+ * @param {String} title PR title
+ * @param {String} url PR URL
+ * @param {String} messageTemplate Message template to render
+ */
+function formatMessage(mention, title, url, messageTemplate) {
+  return messageTemplate
+    .replace('{mention}', mention)
+    .replace('{title}', title)
+    .replace('{url}', url);
+}
+
+/**
+ * Get the mention string formatted for the given provider
+ * @param {String} login GitHub username or team slug
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {Object} github2provider Object containing usernames as properties and IDs as values
+ * @return {String} Formatted mention
+ */
+function getMention(login, provider, github2provider) {
+  switch (provider) {
+    case 'slack':
+    case 'rocket':
+      return github2provider[login] ? `<@${github2provider[login]}>` : `@${login}`;
+    case 'msteams':
+      return github2provider[login] ? `<at>${login}</at>` : `@${login}`;
+    default:
+      return `@${login}`;
+  }
+}
+
+/**
+ * Format a single Pull Request row for the given provider, including its line terminator
+ * @param {Object} obj Object with these properties { url, title, login }
+ * @param {String} mention Formatted mention
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {String} messageTemplate Message template to render
+ * @return {String} Formatted row
+ */
+function formatRow(obj, mention, provider, messageTemplate) {
+  if (provider === 'msteams') {
+    const url = `[${obj.url}](${obj.url})`;
+    return formatMessage(mention, obj.title, url, messageTemplate) + '  \n';
+  }
+  return formatMessage(mention, obj.title, obj.url, messageTemplate) + '\n';
+}
+
+/**
  * Create a pretty message to print
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
  * @param {Object} github2provider Object containing usernames as properties and IDs as values
- * @param {String} provider Service to use: slack or msteams
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {String} messageTemplate Message template to render
+ * @param {Boolean} [aggregatePerMention] Group the rows by mention instead of listing them one PR per row
  * @return {String} Pretty message to print
  */
-function prettyMessage(pr2user, github2provider, provider) {
-  let message = '';
-  for (const obj of pr2user) {
-    switch (provider) {
-      case 'slack': {
-        const mention = github2provider[obj.login] ?
-          `<@${github2provider[obj.login]}>` :
-          `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
-        break;
+function prettyMessage(pr2user, github2provider, provider, messageTemplate, aggregatePerMention) {
+  if (!messageTemplate) {
+    messageTemplate = 'Hey {mention}, the PR "{title}" is waiting for your review: {url}';
+  }
+
+  if (aggregatePerMention) {
+    const loginToPrs = {};
+    for (const obj of pr2user) {
+      if (!loginToPrs[obj.login]) {
+        loginToPrs[obj.login] = [];
       }
-      case 'rocket': {
-        const mention = github2provider[obj.login] ?
-                `<@${github2provider[obj.login]}>` :
-                `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
-        break;
-      }
-      case 'msteams': {
-        const mention = github2provider[obj.login] ?
-          `<at>${obj.login}</at>` :
-          `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
-        break;
+      loginToPrs[obj.login].push(obj);
+    }
+
+    let message = '';
+    for (const login of Object.keys(loginToPrs)) {
+      const prs = loginToPrs[login];
+      const mention = getMention(login, provider, github2provider);
+      message += `${mention} (${prs.length} pull requests):\n`;
+      for (const obj of prs) {
+        message += formatRow(obj, mention, provider, messageTemplate);
       }
     }
+    return message;
+  }
+
+  let message = '';
+  for (const obj of pr2user) {
+    const mention = getMention(obj.login, provider, github2provider);
+    message += formatRow(obj, mention, provider, messageTemplate);
   }
   return message;
 }
@@ -6493,7 +6548,7 @@ module.exports = require("zlib");
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-// Axios v1.3.5 Copyright (c) 2023 Matt Zabriskie and contributors
+// Axios v1.5.0 Copyright (c) 2023 Matt Zabriskie and contributors
 
 
 const FormData$1 = __nccwpck_require__(4334);
@@ -6711,12 +6766,16 @@ const isStream = (val) => isObject(val) && isFunction(val.pipe);
  * @returns {boolean} True if value is an FormData, otherwise false
  */
 const isFormData = (thing) => {
-  const pattern = '[object FormData]';
+  let kind;
   return thing && (
-    (typeof FormData === 'function' && thing instanceof FormData) ||
-    toString.call(thing) === pattern ||
-    (isFunction(thing.toString) && thing.toString() === pattern)
-  );
+    (typeof FormData === 'function' && thing instanceof FormData) || (
+      isFunction(thing.append) && (
+        (kind = kindOf(thing)) === 'formdata' ||
+        // detect form-data instance
+        (kind === 'object' && isFunction(thing.toString) && thing.toString() === '[object FormData]')
+      )
+    )
+  )
 };
 
 /**
@@ -7059,8 +7118,9 @@ const reduceDescriptors = (obj, reducer) => {
   const reducedDescriptors = {};
 
   forEach(descriptors, (descriptor, name) => {
-    if (reducer(descriptor, name, obj) !== false) {
-      reducedDescriptors[name] = descriptor;
+    let ret;
+    if ((ret = reducer(descriptor, name, obj)) !== false) {
+      reducedDescriptors[name] = ret || descriptor;
     }
   });
 
@@ -7181,6 +7241,11 @@ const toJSONObject = (obj) => {
   return visit(obj, 0);
 };
 
+const isAsyncFn = kindOfTest('AsyncFunction');
+
+const isThenable = (thing) =>
+  thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
+
 const utils = {
   isArray,
   isArrayBuffer,
@@ -7230,7 +7295,9 @@ const utils = {
   ALPHABET,
   generateString,
   isSpecCompliantForm,
-  toJSONObject
+  toJSONObject,
+  isAsyncFn,
+  isThenable
 };
 
 /**
@@ -7837,10 +7904,6 @@ function formDataToJSON(formData) {
   return null;
 }
 
-const DEFAULT_CONTENT_TYPE = {
-  'Content-Type': undefined
-};
-
 /**
  * It takes a string, tries to parse it, and if it fails, it returns the stringified version
  * of the input
@@ -7870,7 +7933,7 @@ const defaults = {
 
   transitional: transitionalDefaults,
 
-  adapter: ['xhr', 'http'],
+  adapter: 'http' ,
 
   transformRequest: [function transformRequest(data, headers) {
     const contentType = headers.getContentType() || '';
@@ -7979,17 +8042,14 @@ const defaults = {
 
   headers: {
     common: {
-      'Accept': 'application/json, text/plain, */*'
+      'Accept': 'application/json, text/plain, */*',
+      'Content-Type': undefined
     }
   }
 };
 
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], (method) => {
   defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
 });
 
 const defaults$1 = defaults;
@@ -8325,7 +8385,17 @@ class AxiosHeaders {
 
 AxiosHeaders.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
 
-utils.freezeMethods(AxiosHeaders.prototype);
+// reserved names hotfix
+utils.reduceDescriptors(AxiosHeaders.prototype, ({value}, key) => {
+  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
+  return {
+    get: () => value,
+    set(headerValue) {
+      this[mapped] = headerValue;
+    }
+  }
+});
+
 utils.freezeMethods(AxiosHeaders);
 
 const AxiosHeaders$1 = AxiosHeaders;
@@ -8445,7 +8515,7 @@ function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 }
 
-const VERSION = "1.3.5";
+const VERSION = "1.5.0";
 
 function parseProtocol(url) {
   const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
@@ -8915,6 +8985,21 @@ class ZlibHeaderTransformStream extends stream__default["default"].Transform {
 
 const ZlibHeaderTransformStream$1 = ZlibHeaderTransformStream;
 
+const callbackify = (fn, reducer) => {
+  return utils.isAsyncFn(fn) ? function (...args) {
+    const cb = args.pop();
+    fn.apply(this, args).then((value) => {
+      try {
+        reducer ? cb(null, ...reducer(value)) : cb(null, value);
+      } catch (err) {
+        cb(err);
+      }
+    }, cb);
+  } : fn;
+};
+
+const callbackify$1 = callbackify;
+
 const zlibOptions = {
   flush: zlib__default["default"].constants.Z_SYNC_FLUSH,
   finishFlush: zlib__default["default"].constants.Z_SYNC_FLUSH
@@ -9037,12 +9122,23 @@ const wrapAsync = (asyncExecutor) => {
 /*eslint consistent-return:0*/
 const httpAdapter = isHttpAdapterSupported && function httpAdapter(config) {
   return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
-    let {data} = config;
+    let {data, lookup, family} = config;
     const {responseType, responseEncoding} = config;
     const method = config.method.toUpperCase();
     let isDone;
     let rejected = false;
     let req;
+
+    if (lookup && utils.isAsyncFn(lookup)) {
+      lookup = callbackify$1(lookup, (entry) => {
+        if(utils.isString(entry)) {
+          entry = [entry, entry.indexOf('.') < 0 ? 6 : 4];
+        } else if (!utils.isArray(entry)) {
+          throw new TypeError('lookup async function must return an array [ip: string, family: number]]')
+        }
+        return entry;
+      });
+    }
 
     // temporary internal emitter until the AxiosRequest class will be implemented
     const emitter = new EventEmitter__default["default"]();
@@ -9267,9 +9363,13 @@ const httpAdapter = isHttpAdapterSupported && function httpAdapter(config) {
       agents: { http: config.httpAgent, https: config.httpsAgent },
       auth,
       protocol,
+      family,
       beforeRedirect: dispatchBeforeRedirect,
       beforeRedirects: {}
     };
+
+    // cacheable-lookup integration hotfix
+    !utils.isUndefined(lookup) && (options.lookup = lookup);
 
     if (config.socketPath) {
       options.socketPath = config.socketPath;
@@ -9696,8 +9796,12 @@ const xhrAdapter = isXHRAdapterSupported && function (config) {
       }
     }
 
-    if (utils.isFormData(requestData) && (platform.isStandardBrowserEnv || platform.isStandardBrowserWebWorkerEnv)) {
-      requestHeaders.setContentType(false); // Let the browser set it
+    if (utils.isFormData(requestData)) {
+      if (platform.isStandardBrowserEnv || platform.isStandardBrowserWebWorkerEnv) {
+        requestHeaders.setContentType(false); // Let the browser set it
+      } else {
+        requestHeaders.setContentType('multipart/form-data;', false); // mobile/desktop app frameworks
+      }
     }
 
     let request = new XMLHttpRequest();
@@ -10103,7 +10207,7 @@ function mergeConfig(config1, config2) {
     headers: (a, b) => mergeDeepProperties(headersToObject(a), headersToObject(b), true)
   };
 
-  utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
+  utils.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
     const merge = mergeMap[prop] || mergeDeepProperties;
     const configValue = merge(config1[prop], config2[prop], prop);
     (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue);
@@ -10263,15 +10367,13 @@ class Axios {
     // Set config.method
     config.method = (config.method || this.defaults.method || 'get').toLowerCase();
 
-    let contextHeaders;
-
     // Flatten headers
-    contextHeaders = headers && utils.merge(
+    let contextHeaders = headers && utils.merge(
       headers.common,
       headers[config.method]
     );
 
-    contextHeaders && utils.forEach(
+    headers && utils.forEach(
       ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
       (method) => {
         delete headers[method];
@@ -10681,6 +10783,8 @@ axios.AxiosHeaders = AxiosHeaders$1;
 
 axios.formToJSON = thing => formDataToJSON(utils.isHTMLForm(thing) ? new FormData(thing) : thing);
 
+axios.getAdapter = adapters.getAdapter;
+
 axios.HttpStatusCode = HttpStatusCode$1;
 
 axios.default = axios;
@@ -10800,6 +10904,8 @@ async function main() {
     const channel = core.getInput('channel');
     const github2providerString = core.getInput('github-provider-map');
     const ignoreLabel = core.getInput('ignore-label');
+    const messageTemplate = core.getInput('message-template');
+    const aggregatePerMention = core.getBooleanInput('aggregate-per-mention');
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     const totalReviewers = await getPullRequestsReviewersCount(pullRequests.data);
@@ -10813,7 +10919,7 @@ async function main() {
         return core.setFailed(`The github-provider-map string is not in correct format: "name1:id1,name2:id2,..."`);
       }
       const github2provider = stringToObject(github2providerString);
-      const messageText = prettyMessage(pr2user, github2provider, provider);
+      const messageText = prettyMessage(pr2user, github2provider, provider, messageTemplate, aggregatePerMention);
       let messageObject;
       switch (provider) {
         case 'slack':

@@ -36,6 +36,11 @@ Ignore Pull Requests with that label(s), eg: `no-reminder` or `no-reminder,ignor
 
 The message template to render (optional). Default: `Hey {mention}, the PR "{title}" is waiting for your review: {url}`.
 
+### aggregate-per-mention
+
+Group the message rows by mention, instead of one row per Pull Request (optional). Default: `false`.
+
+When `true`, all the Pull Requests waiting for review from the same person/team are grouped under a single header line: `{mention} ({amount of PRs to review} pull requests):`, followed by one row per Pull Request using `message-template`.
 
 ## Example usage
 
@@ -61,6 +66,7 @@ jobs:
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
         ignore-label: '' # Optional, eg: no-reminder,ignore me
         message-template: '' # Optional, eg: Hey {mention}, the PR "{title}" is waiting for your review: {url}'
+        aggregate-per-mention: '' # Optional, eg: true or false (default false)
 ```
 
 ## Bug or feedback?

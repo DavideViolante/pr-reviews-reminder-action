@@ -27,6 +27,10 @@ inputs:
     description: 'Message template to render'
     required: false
     default: 'Hey {mention}, the PR "{title}" is waiting for your review: {url}'
+  aggregate-per-mention:
+    description: 'Group the message rows by mention, instead of one row per Pull Request'
+    required: false
+    default: 'false'
 runs:
   using: 'node20'
   main: 'dist/index.js'
