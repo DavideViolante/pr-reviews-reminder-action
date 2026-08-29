@@ -85,38 +85,94 @@ function stringToObject(str) {
 }
 
 /**
+ * Format the message to print
+ * @param {String} mention Username to mention as the reviewer
+ * @param {String} title PR title
+ * @param {String} url PR URL
+ * @param {String} messageTemplate Message template to render
+ * @return {String} Formatted message
+ */
+function formatMessage(mention, title, url, messageTemplate) {
+  return messageTemplate
+    .replaceAll('{mention}', mention)
+    .replaceAll('{title}', title)
+    .replaceAll('{url}', url);
+}
+
+/**
+ * Get the mention string formatted for the given provider
+ * @param {String} login GitHub username or team slug
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {Object} github2provider Object containing usernames as properties and IDs as values
+ * @return {String} Formatted mention
+ */
+function getMention(login, provider, github2provider) {
+  switch (provider) {
+    case 'slack':
+    case 'rocket':
+      return github2provider[login] ? `<@${github2provider[login]}>` : `@${login}`;
+    case 'msteams':
+      return github2provider[login] ? `<at>${login}</at>` : `@${login}`;
+    default:
+      return `@${login}`;
+  }
+}
+
+/**
+ * Format a single Pull Request row for the given provider, including its line terminator
+ * @param {Object} obj Object with these properties { url, title, login }
+ * @param {String} mention Formatted mention
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {String} messageTemplate Message template to render
+ * @return {String} Formatted row
+ */
+function formatRow(obj, mention, provider, messageTemplate) {
+  if (provider === 'msteams') {
+    const url = `[${obj.url}](${obj.url})`;
+    return formatMessage(mention, obj.title, url, messageTemplate) + '  \n';
+  }
+  return formatMessage(mention, obj.title, obj.url, messageTemplate) + '\n';
+}
+
+/**
  * Create a pretty message to print
  * @param {Array} pr2user Array of Object with these properties { url, title, login }
  * @param {Object} github2provider Object containing usernames as properties and IDs as values
- * @param {String} provider Service to use: slack or msteams
+ * @param {String} provider Service to use: slack, rocket or msteams
+ * @param {String} messageTemplate Message template to render
+ * @param {Boolean} [aggregatePerMention] Group the rows by mention instead of listing them one PR per row
  * @return {String} Pretty message to print
  */
-function prettyMessage(pr2user, github2provider, provider) {
-  let message = '';
-  for (const obj of pr2user) {
-    switch (provider) {
-      case 'slack': {
-        const mention = github2provider[obj.login] ?
-          `<@${github2provider[obj.login]}>` :
-          `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
-        break;
+function prettyMessage(pr2user, github2provider, provider, messageTemplate, aggregatePerMention) {
+  if (!messageTemplate) {
+    messageTemplate = 'Hey {mention}, the PR "{title}" is waiting for your review: {url}';
+  }
+
+  if (aggregatePerMention) {
+    const loginToPrs = Object.create(null);
+    for (const obj of pr2user) {
+      if (!loginToPrs[obj.login]) {
+        loginToPrs[obj.login] = [];
       }
-      case 'rocket': {
-        const mention = github2provider[obj.login] ?
-                `<@${github2provider[obj.login]}>` :
-                `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: ${obj.url}\n`;
-        break;
-      }
-      case 'msteams': {
-        const mention = github2provider[obj.login] ?
-          `<at>${obj.login}</at>` :
-          `@${obj.login}`;
-        message += `Hey ${mention}, the PR "${obj.title}" is waiting for your review: [${obj.url}](${obj.url})  \n`;
-        break;
+      loginToPrs[obj.login].push(obj);
+    }
+
+    let message = '';
+    for (const login of Object.keys(loginToPrs)) {
+      const prs = loginToPrs[login];
+      const mention = getMention(login, provider, github2provider);
+      message += `${mention} (${prs.length} pull requests):\n`;
+      for (const obj of prs) {
+        message += formatRow(obj, mention, provider, messageTemplate);
       }
     }
+    return message;
+  }
+
+  let message = '';
+  for (const obj of pr2user) {
+    const mention = getMention(obj.login, provider, github2provider);
+    message += formatRow(obj, mention, provider, messageTemplate);
   }
   return message;
 }

@@ -469,6 +469,55 @@ describe('Pull Request Reviews Reminder Action tests', () => {
     assert.strictEqual(dRow, 'Hey @User2, the PR "Title5" is waiting for your review: [https://example.com/5](https://example.com/5)');
   });
 
+  it('Should print the pretty message, aggregated per mention, Slack (correct map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack', undefined, true);
+    const rows = message.trimEnd().split('\n');
+    assert.deepStrictEqual(rows, [
+      '<@ID123> (1 pull requests):',
+      'Hey <@ID123>, the PR "Title1" is waiting for your review: https://example.com/1',
+      '<@ID456> (2 pull requests):',
+      'Hey <@ID456>, the PR "Title1" is waiting for your review: https://example.com/1',
+      'Hey <@ID456>, the PR "Title5" is waiting for your review: https://example.com/5',
+      '<@ID789> (1 pull requests):',
+      'Hey <@ID789>, the PR "Title3" is waiting for your review: https://example.com/3',
+    ]);
+  });
+
+  it('Should print the pretty message, aggregated per mention, Slack (no map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2providerNoData, 'slack', undefined, true);
+    const [aRow, bRow, cRow, dRow, eRow] = message.split('\n');
+    assert.strictEqual(aRow, '@User1 (1 pull requests):');
+    assert.strictEqual(bRow, 'Hey @User1, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(cRow, '@User2 (2 pull requests):');
+    assert.strictEqual(dRow, 'Hey @User2, the PR "Title1" is waiting for your review: https://example.com/1');
+    assert.strictEqual(eRow, 'Hey @User2, the PR "Title5" is waiting for your review: https://example.com/5');
+  });
+
+  it('Should print the pretty message, aggregated per mention, Teams (correct map)', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'msteams', undefined, true);
+    const rows = message.split('  \n');
+    assert.strictEqual(rows[0], '<at>User1</at> (1 pull requests):\nHey <at>User1</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+    assert.strictEqual(rows[1], '<at>User2</at> (2 pull requests):\nHey <at>User2</at>, the PR "Title1" is waiting for your review: [https://example.com/1](https://example.com/1)');
+  });
+
+  it('Should not aggregate the pretty message per mention when the flag is not set', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack');
+    assert.ok(!message.includes('pull requests):'));
+  });
+
+  it('Should print the pretty message, one reviewer per row, unknown provider', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'unknown');
+    const [aRow] = message.split('\n');
+    assert.ok(aRow.includes('@User1'));
+  });
+
+  it('Should print the pretty message with a custom message template', () => {
+    const message = prettyMessage(mockPr2User, mockGithub2provider, 'slack', 'Review needed: {url}');
+    const [aRow] = message.split('\n');
+    assert.ok(aRow.includes('Review needed:'));
+    assert.ok(aRow.includes('https://example.com/'));
+  });
+
   it('Should create mentions array, Teams', () => {
     const mentions = getTeamsMentions(mockGithub2provider, mockPr2User);
     assert.deepEqual(mentions, mockTeamsMentions);

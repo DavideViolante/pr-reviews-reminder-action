@@ -32,6 +32,16 @@ Another hacky way (no code) to find the MS Teams UPN is the following: open MS T
 
 Ignore Pull Requests with that label(s), eg: `no-reminder` or `no-reminder,ignore me` (optional).
 
+### message-template
+
+The message template to render (optional). Default: `Hey {mention}, the PR "{title}" is waiting for your review: {url}`.
+
+### aggregate-per-mention
+
+Group the message rows by mention, instead of one row per Pull Request (optional). Default: `false`.
+
+When `true`, all the Pull Requests waiting for review from the same person/team are grouped under a single header line: `{mention} ({amount of PRs to review} pull requests):`, followed by one row per Pull Request using `message-template`.
+
 ## Example usage
 
 ```yaml
@@ -46,7 +56,7 @@ jobs:
   pr-reviews-reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: davideviolante/pr-reviews-reminder-action@v2.8.0
+    - uses: davideviolante/pr-reviews-reminder-action@v2.9.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -55,6 +65,8 @@ jobs:
         channel: '' # Optional, eg: #general
         github-provider-map: '' # Optional, eg: DavideViolante:UEABCDEFG,foobar:UAABCDEFG
         ignore-label: '' # Optional, eg: no-reminder,ignore me
+        message-template: '' # Optional, eg: Hey {mention}, the PR "{title}" is waiting for your review: {url}
+        aggregate-per-mention: false # Optional, eg: true or false (default false)
 ```
 
 ## Bug or feedback?
