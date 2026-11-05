@@ -35,12 +35,34 @@ async function getPullRequests() {
 }
 
 /**
+ * Validate that the webhook URL is an absolute HTTPS URL and not pointing to internal/private infrastructure
+ * @param {String} webhookUrl Webhook URL
+ * @return {Boolean} Validity of the webhook URL
+ */
+function isValidWebhookUrl(webhookUrl) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(webhookUrl);
+  } catch {
+    return false;
+  }
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const blockedHostnames = ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254', '::1'];
+  return parsedUrl.protocol === 'https:' &&
+    !blockedHostnames.includes(hostname) &&
+    !/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|127\.)/.test(hostname);
+}
+
+/**
  * Send notification to a channel
  * @param {String} webhookUrl Webhook URL
  * @param {String} messageData Message data object to send into the channel
  * @return {Promise} Axios promise
  */
 async function sendNotification(webhookUrl, messageData) {
+  if (!isValidWebhookUrl(webhookUrl)) {
+    throw new Error('Invalid webhook-url: must be an absolute HTTPS URL and not point to internal/private infrastructure.');
+  }
   return axios({
     method: 'POST',
     url: webhookUrl,
